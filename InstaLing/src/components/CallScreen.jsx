@@ -171,22 +171,26 @@ const CallScreen = ({onEndCall}) => {
       {videoSelected && (
         <View style={{flex: 1, position: 'relative'}}>
           {/* Remote user's video */}
-          <View>
-            {/* This is for the user to whom I'm talking */}
-            <Image
-              style={{width: 360, height: 640}}
-              source={{
-                uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmFvsTU3oFayIDR7Amtxqh-No6UhNpolgVCSFk2dl01g&s',
-              }}
-            />
-          </View>
           <View style={{position: 'absolute', zIndex: 9, top: 10, left: 260}}>
-            {/* My video box in which my video will be shown */}
+            {/* Remote user's video box */}
+            {remoteStream && (
+              <RTCView
+                streamURL={remoteStream.toURL()}
+                style={{width: 360, height: 640}} // Adjust width and height to match the image
+                audio={true} // Add audio attribute
+                mirror={true}
+              />
+            )}
+          </View>
+          {/* Your video */}
+          <View style={{position: 'absolute', zIndex: 9, top: 10, left: 80}}>
+            {/* Your video box */}
             {localStream && (
               <RTCView
                 streamURL={localStream.toURL()}
                 style={{width: 100, height: 150}}
                 audio={true} // Add audio attribute
+                mirror={true} // Add mirror prop if needed
               />
             )}
           </View>
