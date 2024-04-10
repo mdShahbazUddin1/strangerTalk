@@ -1,3 +1,5 @@
+// CallScreen.js
+
 import React, {useState, useEffect, useRef} from 'react';
 import {View, Text, TouchableOpacity, Image} from 'react-native';
 import {
@@ -7,13 +9,13 @@ import {
   RTCIceCandidate,
   RTCSessionDescription,
 } from 'react-native-webrtc';
-import io from 'socket.io-client';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import io from 'socket.io-client';
 
-const socket = io('http://192.168.1.5:3000');
+const socket = io('http://192.168.1.16:3000');
 
 const CallScreen = ({onEndCall}) => {
   const [localStream, setLocalStream] = useState(null);
@@ -25,25 +27,34 @@ const CallScreen = ({onEndCall}) => {
 
   useEffect(() => {
     const initCall = async () => {
-      const stream = await mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      setLocalStream(stream);
+      try {
+        const stream = await mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+        setLocalStream(stream);
 
-      socket.emit('joinRoom', 'room1');
+        console.log('Socket connected:', socket.connected);
 
-      socket.on('offer', async offer => {
-        await handleOffer(offer);
-      });
+        socket.emit('joinRoom', 'room1');
 
-      socket.on('answer', async answer => {
-        await handleAnswer(answer);
-      });
+        socket.on('offer', async offer => {
+          console.log('Received offer:', offer);
+          await handleOffer(offer);
+        });
 
-      socket.on('iceCandidate', async iceCandidate => {
-        await handleIceCandidate(iceCandidate);
-      });
+        socket.on('answer', async answer => {
+          console.log('Received answer:', answer);
+          await handleAnswer(answer);
+        });
+
+        socket.on('iceCandidate', async iceCandidate => {
+          console.log('Received iceCandidate:', iceCandidate);
+          await handleIceCandidate(iceCandidate);
+        });
+      } catch (error) {
+        console.error('Error initializing call:', error);
+      }
     };
 
     initCall();
@@ -60,16 +71,24 @@ const CallScreen = ({onEndCall}) => {
   }, []);
 
   const handleOffer = async offer => {
+    console.log('Received offer:', offer);
     if (!peerConnection.current) {
+      console.log('Creating peer connection...');
       createPeerConnection();
     }
 
-    await peerConnection.current.setRemoteDescription(
-      new RTCSessionDescription(offer),
-    );
-    const answer = await peerConnection.current.createAnswer();
-    await peerConnection.current.setLocalDescription(answer);
-    socket.emit('answer', {room: 'room1', answer});
+    try {
+      await peerConnection.current.setRemoteDescription(
+        new RTCSessionDescription(offer),
+      );
+      console.log('Remote description set successfully.');
+      const answer = await peerConnection.current.createAnswer();
+      await peerConnection.current.setLocalDescription(answer);
+      console.log('Answer created and set as local description.');
+      socket.emit('answer', {room: 'room1', answer});
+    } catch (error) {
+      console.error('Error handling offer:', error);
+    }
   };
 
   const handleAnswer = async answer => {
@@ -85,10 +104,12 @@ const CallScreen = ({onEndCall}) => {
   };
 
   const createPeerConnection = () => {
+    console.log('Creating peer connection...');
     const pc = new RTCPeerConnection();
 
     pc.onicecandidate = event => {
       if (event.candidate) {
+        console.log('Sending ICE candidate:', event.candidate);
         socket.emit('iceCandidate', {
           room: 'room1',
           iceCandidate: event.candidate,
@@ -97,8 +118,12 @@ const CallScreen = ({onEndCall}) => {
     };
 
     pc.ontrack = event => {
-      setRemoteStream(event.streams[0]);
+      console.log('Remote stream added:', event.streams[0]);
+      setRemoteStream(event.streams[0]); // Update remote stream
     };
+
+    // Additional logging for debugging
+    console.log('Peer connection setup complete.');
 
     if (localStream) {
       localStream.getTracks().forEach(track => {
@@ -171,19 +196,21 @@ const CallScreen = ({onEndCall}) => {
       {videoSelected && (
         <View style={{flex: 1, position: 'relative'}}>
           {/* Remote user's video */}
-          <View style={{position: 'absolute', zIndex: 9, top: 10, left: 260}}>
+          <View>
             {/* Remote user's video box */}
+            {console.log('remoteStream:', remoteStream)}
             {remoteStream && (
               <RTCView
                 streamURL={remoteStream.toURL()}
-                style={{width: 360, height: 640}} // Adjust width and height to match the image
+                style={{width: '100%', height: '100%'}}
                 audio={true} // Add audio attribute
                 mirror={true}
               />
             )}
+            {!remoteStream && <Text>No remote stream available</Text>}
           </View>
           {/* Your video */}
-          <View style={{position: 'absolute', zIndex: 9, top: 10, left: 80}}>
+          <View style={{position: 'absolute', zIndex: 9, top: 10, left: 160}}>
             {/* Your video box */}
             {localStream && (
               <RTCView

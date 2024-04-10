@@ -1,3 +1,5 @@
+// server.js
+
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -10,11 +12,15 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
+// Store socket connections
+const connectedClients = {};
+
 io.on("connection", (socket) => {
   console.log("New client connected");
 
   socket.on("joinRoom", (room) => {
     socket.join(room);
+    connectedClients[room] = socket.id;
   });
 
   socket.on("offer", ({ room, offer }) => {
@@ -31,6 +37,13 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
+    // Remove the disconnected client from the connectedClients object
+    for (const room in connectedClients) {
+      if (connectedClients[room] === socket.id) {
+        delete connectedClients[room];
+        break;
+      }
+    }
   });
 });
 
