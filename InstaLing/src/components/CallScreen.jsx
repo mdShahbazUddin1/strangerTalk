@@ -3,6 +3,7 @@ import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
 import {StyleSheet, View, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
@@ -28,6 +29,9 @@ export default function CallScreen(props) {
           onHangUp: () => {
             navigation.navigate('Feedback');
           },
+          turnOnCameraWhenJoining: false,
+          turnOnMicrophoneWhenJoining: false,
+          useSpeakerWhenJoining: true,
           avatarBuilder: ({userInfo}) => {
             return (
               <View style={{width: '100%', height: '100%'}}>
@@ -38,6 +42,15 @@ export default function CallScreen(props) {
                 />
               </View>
             );
+          },
+          layout: {
+            mode: ZegoLayoutMode.pictureInPicture,
+            config: {
+              switchLargeOrSmallViewByClick: true,
+              smallViewBorderRadius: 10,
+              smallViewPosition: ZegoViewPosition.topRight,
+              smallViewSize: {width: 85, height: 151},
+            },
           },
         }}
       />
