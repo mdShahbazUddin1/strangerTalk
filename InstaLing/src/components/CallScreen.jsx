@@ -3,16 +3,12 @@ import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
-import * as ZIM from 'zego-zim-react-native';
-import * as ZPNs from 'zego-zpns-react-native';
 import {StyleSheet, View, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 export default function CallScreen(props) {
   const navigation = useNavigation();
   const userId = String(Math.floor(Math.random() * 100000));
-
   return (
     <View style={styles.container}>
       <ZegoUIKitPrebuiltCall
@@ -32,43 +28,18 @@ export default function CallScreen(props) {
           onHangUp: () => {
             navigation.navigate('Feedback');
           },
-          layout: {
-            mode: ZegoLayoutMode.pictureInPicture,
-            config: {
-              switchLargeOrSmallViewByClick: true,
-              smallViewPosition: ZegoViewPosition.topRight,
-              smallViewSize: {width: 100, height: 100}, // Adjust size as needed
-            },
-          },
           avatarBuilder: ({userInfo}) => {
-            if (userInfo) {
-              return (
-                <View
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    transform: [{scaleX: -1}],
-                  }}>
-                  <Image
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      transform: [{scaleX: -1}],
-                    }}
-                    resizeMode="cover"
-                    source={{
-                      uri: `https://robohash.org/${userInfo.userId}.png`,
-                    }}
-                  />
-                </View>
-              );
-            } else {
-              return null; // Handle the case when userInfo is null
-            }
+            return (
+              <View style={{width: '100%', height: '100%'}}>
+                <Image
+                  style={{width: '100%', height: '100%'}}
+                  resizeMode="cover"
+                  source={{uri: `https://robohash.org/${userInfo.userId}.png`}}
+                />
+              </View>
+            );
           },
         }}
-        zimInstance={ZIM} // Pass ZIM instance
-        zpnsInstance={ZPNs} // Pass ZPNs instance
       />
     </View>
   );
