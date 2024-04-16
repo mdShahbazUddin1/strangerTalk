@@ -11,6 +11,7 @@ import {
   ScrollView,
   Platform,
   Keyboard,
+  Alert,
 } from 'react-native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -28,6 +29,33 @@ function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const navigation = useNavigation();
+
+  const handleRegister = async values => {
+    try {
+      const response = await fetch(
+        'https://strangerbackend.onrender.com/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to register');
+      }
+      Alert.alert(
+        'Registration successful',
+        'You have successfully registered.',
+        [{text: 'OK', onPress: () => navigation.navigate('Login')}],
+      );
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', 'Failed to register. Please try again later.');
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -105,11 +133,11 @@ function RegisterScreen() {
             initialValues={{
               username: '',
               email: '',
+              phone: '', // Changed from phoneNumber to phone
               password: '',
-              phoneNumber: '',
             }}
             validationSchema={validationSchema}
-            onSubmit={values => console.log(values)}>
+            onSubmit={handleRegister}>
             {({
               handleChange,
               handleBlur,
@@ -224,9 +252,7 @@ function RegisterScreen() {
                     style={[
                       styles.textInputBox,
                       isFocusedPhoneNumber && styles.focused,
-                      touched.phoneNumber &&
-                        errors.phoneNumber &&
-                        styles.errorInput,
+                      touched.phone && errors.phone && styles.errorInput,
                     ]}>
                     <Feather
                       style={styles.icon}
@@ -239,23 +265,23 @@ function RegisterScreen() {
                       placeholder="Enter your phone number"
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusPhoneNumber}
-                      onBlur={handleBlur('phoneNumber')}
-                      onChangeText={handleChange('phoneNumber')}
-                      value={values.phoneNumber}
+                      onBlur={handleBlur('phone')}
+                      onChangeText={handleChange('phone')}
+                      value={values.phone}
                       keyboardType="numeric"
                     />
-                    {touched.phoneNumber && !errors.phoneNumber ? (
+                    {touched.phone && !errors.phone ? (
                       <FontAwesome
                         name="check-circle"
                         size={20}
                         color="green"
                       />
-                    ) : touched.phoneNumber ? (
+                    ) : touched.phone ? (
                       <FontAwesome name="times-circle" size={20} color="red" />
                     ) : null}
                   </View>
-                  {touched.phoneNumber && errors.phoneNumber && (
-                    <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+                  {touched.phone && errors.phone && (
+                    <Text style={styles.errorText}>{errors.phone}</Text>
                   )}
                 </View>
                 <Pressable
@@ -309,7 +335,7 @@ const validationSchema = Yup.object().shape({
   password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
-  phoneNumber: Yup.string()
+  phone: Yup.string() // Changed from phoneNumber to phone
     .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
     .required('Phone number is required'),
 });

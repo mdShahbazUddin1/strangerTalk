@@ -1,14 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {Platform, Text, View, PermissionsAndroid} from 'react-native';
+import {Platform, Text, SafeAreaView} from 'react-native';
 import WavyCallIndicator from '../components/WavyCallIndicator';
 import CallScreen from '../components/CallScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {PermissionsAndroid} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 function FindCallScreen() {
   const [showCallScreen, setShowCallScreen] = useState(false);
   const [audioPermission, setAudioPermission] = useState(null);
   const [videoPermission, setVideoPermission] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pairedData, setPairedData] = useState([]);
   const navigation = useNavigation();
 
   const requestCameraPermission = async () => {
@@ -23,19 +26,13 @@ function FindCallScreen() {
             buttonNegative: 'Cancel',
           },
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          return 'granted';
-        } else {
-          return 'denied';
-        }
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
       } catch (err) {
         console.warn(err);
-        return 'denied';
+        return false;
       }
     } else {
-      // For iOS, camera permission is handled through Info.plist configuration
-      // Return granted assuming the permission is configured in Info.plist
-      return 'granted';
+      return true;
     }
   };
 
@@ -51,60 +48,68 @@ function FindCallScreen() {
             buttonNegative: 'Cancel',
           },
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          return 'granted';
-        } else {
-          return 'denied';
-        }
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
       } catch (err) {
         console.warn(err);
-        return 'denied';
+        return false;
       }
     } else {
-      // For iOS, microphone permission is handled through Info.plist configuration
-      // Return granted assuming the permission is configured in Info.plist
-      return 'granted';
+      return true;
     }
+  };
+
+  const handleEndCall = () => {
+    setShowCallScreen(false);
   };
 
   useEffect(() => {
     const checkPermissions = async () => {
       const audioStatus = await requestMicrophonePermission();
       const videoStatus = await requestCameraPermission();
-
       setAudioPermission(audioStatus);
       setVideoPermission(videoStatus);
     };
 
     checkPermissions();
+    getUser();
   }, []);
 
-  useEffect(() => {
-    setShowCallScreen(false); // Reset showCallScreen state to false each time component mounts
-    const timer = setTimeout(() => {
-      setShowCallScreen(true);
-    }, 3000);
+  const getUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
 
-    return () => clearTimeout(timer);
-  }, []);
+      if (!token) {
+        navigation.navigate('Login');
+        return;
+      }
 
-  useEffect(() => {
-    const focusListener = navigation.addListener('focus', () => {
-      setShowCallScreen(false);
-      const timer = setTimeout(() => {
+      const response = await fetch(
+        `https://strangerbackend.onrender.com/auth/getrandom`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        },
+      );
+      const data = await response.json();
+
+      if (data.message === 'Successfully paired') {
+        setPairedData(data.users);
+        // console.log(data.users);
+        setIsLoading(false);
         setShowCallScreen(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    });
-    return () => focusListener();
-  }, [navigation]);
-
-  const handleEndCall = () => {
-    setShowCallScreen(false);
-    // Navigate to Feedback screen after ending the call
+        // console.log('paired', pairedData);
+      } else {
+        setTimeout(getUser, 1000);
+        console.log('Waiting for a match...');
+      }
+    } catch (error) {
+      console.error('Error getting random users:', error);
+      setIsLoading(false); // Stop loading indicator on error
+    }
   };
 
-  if (audioPermission !== 'granted' || videoPermission !== 'granted') {
+  if (audioPermission !== true || videoPermission !== true) {
     return (
       <SafeAreaView
         style={{
@@ -130,11 +135,11 @@ function FindCallScreen() {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      {showCallScreen ? (
-        <CallScreen onEndCall={handleEndCall} />
-      ) : (
+      {isLoading ? (
         <WavyCallIndicator />
-      )}
+      ) : showCallScreen ? (
+        <CallScreen pairedData={pairedData} onEndCall={handleEndCall} />
+      ) : null}
     </SafeAreaView>
   );
 }

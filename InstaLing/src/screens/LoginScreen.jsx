@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Alert,
 } from 'react-native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -30,6 +31,41 @@ const LoginScreen = () => {
   const [emailValid, setEmailValid] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const navigation = useNavigation();
+
+  const handleLogin = async values => {
+    try {
+      const response = await fetch(
+        'https://strangerbackend.onrender.com/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to login');
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.msg === 'Email or password is incorrect') {
+        Alert.alert('Invalid Credentials', 'Email or password is incorrect');
+        return;
+      }
+
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      await AsyncStorage.setItem('token', responseData.token);
+      Alert.alert('Login successful', 'You have successfully logged in.', [
+        {text: 'OK', onPress: () => navigation.navigate('Main')},
+      ]);
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', 'Failed to login. Please try again later.');
+    }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -89,21 +125,6 @@ const LoginScreen = () => {
       setPasswordError('Password must be at least 6 characters');
     } else {
       setPasswordError('');
-    }
-  };
-
-  const handleLogin = async values => {
-    // Validate email and password
-    if (emailValid && values.password.length >= 6) {
-      // Store login status
-      try {
-        await AsyncStorage.setItem('isLoggedIn', 'true');
-        navigation.replace('Main');
-      } catch (error) {
-        console.error('Error storing login status:', error);
-      }
-    } else {
-      console.log('Invalid email or password');
     }
   };
 
