@@ -3,6 +3,7 @@ const UserModel = require("../models/usermodel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const { BlackListModel } = require("../models/blacklist");
 
 const registerValidation = [
   // Validate username
@@ -90,6 +91,18 @@ const getLoggedInUser = async (req, res) => {
   }
 };
 
+const getSingleUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const getUser = await UserModel.findOne({ _id: userId });
+    if (!getUser) return res.status(403).send({ msg: "User not found" });
+    res.status(200).send({ msg: "User Found", getUser });
+  } catch (error) {
+    res.status(503).send({ msg: "Internal Error", error: error.message });
+  }
+};
+
 const getRandomUsers = async (req, res) => {
   try {
     const currentUser = req.user;
@@ -133,10 +146,80 @@ const getRandomUsers = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { username, phone, email } = req.body;
+    const userId = req.userId;
+
+    let profileDataURL = null;
+    let backgroundDataURL = null;
+    if (req.files) {
+      const profileImageFile = req.files["profileImage"];
+      if (profileImageFile) {
+        const profileImageBuffer = profileImageFile[0].buffer;
+        const profileImageBase64 = profileImageBuffer.toString("base64");
+        profileDataURL = `data:${profileImageFile[0].mimetype};base64,${profileImageBase64}`;
+      }
+
+      const backgroundImageFile = req.files["backgroundImage"];
+      if (backgroundImageFile) {
+        const backgroundImageBuffer = backgroundImageFile[0].buffer;
+        const backgroundImageBase64 = backgroundImageBuffer.toString("base64");
+        backgroundDataURL = `data:${backgroundImageFile[0].mimetype};base64,${backgroundImageBase64}`;
+      }
+    }
+
+    // Update the profile in the database
+    const updateProfile = await UserModel.findOne({ _id: userId });
+    if (!updateProfile) {
+      return res.status(403).send({ msg: "User not found" });
+    }
+
+    updateProfile.username = username;
+    updateProfile.phone = phone;
+    updateProfile.email = email;
+    updateProfile.backgroundImage = backgroundDataURL;
+    updateProfile.profileImage = profileDataURL;
+
+    await updateProfile.save();
+
+    res
+      .status(200)
+      .send({ msg: "Profile updated successfully", updateProfile });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res
+      .status(500)
+      .send({ msg: "Internal server error", error: error.message });
+  }
+};
+
+const logout = async (req, res) => {
+  try {
+    const token = req.headers?.authorization;
+    if (!token) {
+      return res.status(400).json({ msg: "Token is invalid or not provided" });
+    }
+
+    const blacklistToken = new BlackListModel({
+      token: token,
+    });
+
+    await blacklistToken.save();
+
+    res.status(200).json({ msg: "Logout success" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   register,
   registerValidation,
   login,
   getLoggedInUser,
   getRandomUsers,
+  updateProfile,
+  getSingleUser,
+  logout,
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -7,13 +7,118 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProfileImageUploader from '../components/ProfileImageUploader';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function MyProfileScreen() {
   const navigation = useNavigation();
+  const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [profileImage, setProfileImage] = useState('');
+  const [backgroundImage, setBackgroundImage] = useState('');
+
+  const getUserProfile = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch(
+        `http://192.168.1.9:8080/auth/getsingleuser`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token,
+          },
+        },
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setUsername(data.getUser.username);
+        setPhone(data.getUser.phone);
+        setEmail(data.getUser.email);
+        setProfileImage(data.getUser.profileImage);
+        setBackgroundImage(data.getUser.backgroundImage);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    getUserProfile();
+  }, []);
+
+  const handleUpdateProfile = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!username || !phone || !email) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('phone', phone);
+    formData.append('email', email);
+    formData.append('profileImage', {
+      uri: profileImage,
+      name: 'profile.jpg',
+      type: 'image/jpeg',
+    });
+    formData.append('backgroundImage', {
+      uri: backgroundImage,
+      name: 'background.jpg',
+      type: 'image/jpeg',
+    });
+    try {
+      const response = await fetch(`http://192.168.1.9:8080/auth/editprofile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: token,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Profile updated successfully');
+        getUserProfile();
+      } else {
+        Alert.alert('Error', 'Failed to update profile');
+        console.log('Failed to update profile:', response.statusText);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Server Error');
+      console.log('Server Error:', error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch('http://192.168.1.9:8080/auth/logout', {
+        method: 'GET',
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      if (response.ok) {
+        await AsyncStorage.removeItem('token');
+        navigation.replace('Login');
+        return;
+      } else {
+        // Handle non-successful response (e.g., display an error message)
+        console.error('Failed to logout:', response.statusText);
+      }
+    } catch (error) {
+      // Handle fetch errors (e.g., network error)
+      console.error('Error during logout:', error);
+      // Optionally, display an error message to the user
+    }
+  };
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
       <View
@@ -39,7 +144,7 @@ function MyProfileScreen() {
             Profile
           </Text>
         </View>
-        <TouchableOpacity style={{padding: 5}}>
+        <TouchableOpacity style={{padding: 5}} onPress={handleLogout}>
           <Text
             style={{
               color: '#9095A1FF',
@@ -53,8 +158,13 @@ function MyProfileScreen() {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
-          {/* ProfileImagerUploader */}
-          <ProfileImageUploader />
+          {/* ProfileImageUploader */}
+          <ProfileImageUploader
+            profileImage={profileImage}
+            bgImage={backgroundImage}
+            setProfileImage={setProfileImage}
+            setBackgroundImage={setBackgroundImage}
+          />
 
           {/* Profile Update */}
           <View
@@ -72,7 +182,7 @@ function MyProfileScreen() {
                   fontFamily: 'sans-serif',
                   color: 'gray',
                 }}>
-                Name
+                Username
               </Text>
               <TextInput
                 style={{
@@ -80,8 +190,11 @@ function MyProfileScreen() {
                   lineHeight: 32,
                   padding: 5,
                   marginTop: 5,
+                  color: 'gray',
                 }}
-                placeholder="Emelie"
+                value={username}
+                onChangeText={setUsername}
+                placeholder={username}
                 placeholderTextColor="#9095A1FF"
               />
             </View>
@@ -101,9 +214,11 @@ function MyProfileScreen() {
                   lineHeight: 32,
                   padding: 5,
                   marginTop: 5,
+                  color: 'gray',
                 }}
-                placeholder="996237891"
-                placeholderTextColor="#9095A1FF"
+                value={phone}
+                onChangeText={setPhone}
+                placeholder={phone}
               />
             </View>
             <View style={{marginBottom: 15}}>
@@ -122,9 +237,11 @@ function MyProfileScreen() {
                   lineHeight: 32,
                   padding: 5,
                   marginTop: 5,
+                  color: 'gray',
                 }}
-                placeholder="example@gmail.com"
-                placeholderTextColor="#9095A1FF"
+                value={email}
+                onChangeText={setEmail}
+                placeholder={email}
               />
             </View>
 
@@ -134,7 +251,8 @@ function MyProfileScreen() {
                 marginTop: 30,
                 backgroundColor: '#6D31EDFF',
                 padding: 10,
-              }}>
+              }}
+              onPress={handleUpdateProfile}>
               <Text style={{color: '#ffffff'}}>Save Changes</Text>
             </Pressable>
           </View>

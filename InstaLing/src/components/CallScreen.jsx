@@ -7,7 +7,7 @@ import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
 import {StyleSheet, View, Image, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-export default function CallScreen({pairedData, props}) {
+export default function CallScreen({pairedData}, props) {
   const navigation = useNavigation();
   const userId = String(Math.floor(Math.random() * 100000));
 
@@ -25,9 +25,7 @@ export default function CallScreen({pairedData, props}) {
           callID={'group123'}
           config={{
             ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
-            onOnlySelfInRoom: () => {
-              props.navigation.navigate('Feedback');
-            },
+
             onHangUp: () => {
               props.navigation.navigate('Feedback');
             },

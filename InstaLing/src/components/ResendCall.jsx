@@ -28,7 +28,7 @@ function ResendCall({resendUser}) {
               fontFamily: 'sans-serif',
               fontSize: 16,
             }}>
-            Resend Call
+            Recent Call
           </Text>
         </View>
         <View>
