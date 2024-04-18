@@ -62,10 +62,10 @@ const login = async (req, res) => {
       return res.status(403).send({ msg: "Email or password is incorrect" });
 
     const isPasswordValid = await bcrypt.compare(
-      isUserPresent.password,
-      password
+      password,
+      isUserPresent.password
     );
-    if (isPasswordValid)
+    if (!isPasswordValid)
       return res.status(403).send({ msg: "Email or password is incorrect" });
 
     const token = await jwt.sign(

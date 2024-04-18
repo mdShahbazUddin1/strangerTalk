@@ -35,7 +35,7 @@ const LoginScreen = () => {
   const handleLogin = async values => {
     try {
       const response = await fetch(
-        'https://strangerbackend.onrender.com/auth/login',
+        'https://stranger-backend.onrender.com/auth/login',
         {
           method: 'POST',
           headers: {
@@ -45,24 +45,19 @@ const LoginScreen = () => {
         },
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to login');
-      }
-
-      const responseData = await response.json();
-
-      if (responseData.msg === 'Email or password is incorrect') {
+      if (response.status === 403) {
         Alert.alert('Invalid Credentials', 'Email or password is incorrect');
-        return;
       }
 
-      await AsyncStorage.setItem('isLoggedIn', 'true');
-      await AsyncStorage.setItem('token', responseData.token);
-      Alert.alert('Login successful', 'You have successfully logged in.', [
-        {text: 'OK', onPress: () => navigation.navigate('Main')},
-      ]);
+      if (response.status === 200) {
+        const responseData = await response.json();
+        await AsyncStorage.setItem('isLoggedIn', 'true');
+        await AsyncStorage.setItem('token', responseData.token);
+        Alert.alert('Login successful', 'You have successfully logged in.', [
+          {text: 'OK', onPress: () => navigation.navigate('Main')},
+        ]);
+      }
     } catch (error) {
-      console.error('Login error:', error);
       Alert.alert('Error', 'Failed to login. Please try again later.');
     }
   };

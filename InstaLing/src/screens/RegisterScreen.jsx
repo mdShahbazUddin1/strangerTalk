@@ -33,7 +33,7 @@ function RegisterScreen() {
   const handleRegister = async values => {
     try {
       const response = await fetch(
-        'https://strangerbackend.onrender.com/auth/register',
+        'https://stranger-backend.onrender.com/auth/register',
         {
           method: 'POST',
           headers: {
@@ -43,16 +43,17 @@ function RegisterScreen() {
         },
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to register');
+      if (response.status === 409) {
+        Alert.alert('Error', 'Email is already registered');
       }
-      Alert.alert(
-        'Registration successful',
-        'You have successfully registered.',
-        [{text: 'OK', onPress: () => navigation.navigate('Login')}],
-      );
+      if (response.status === 200) {
+        Alert.alert(
+          'Registration successful',
+          'You have successfully registered.',
+          [{text: 'OK', onPress: () => navigation.navigate('Login')}],
+        );
+      }
     } catch (error) {
-      console.error('Registration error:', error);
       Alert.alert('Error', 'Failed to register. Please try again later.');
     }
   };

@@ -1,50 +1,60 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
-import {StyleSheet, View, Image, Text} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 
-export default function CallScreen({pairedData}, props) {
+import {StyleSheet, View, Image} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {hangUpCall} from '../redux/actions';
+
+export default function CallScreen({pairedData}) {
   const navigation = useNavigation();
-  const userId = String(Math.floor(Math.random() * 100000));
+  const dispatch = useDispatch();
+  const callActive = useSelector(state => state.callActive);
+
+  useEffect(() => {
+    if (!callActive) {
+      navigation.replace('Feedback');
+    }
+  }, [callActive, navigation]);
+
+  const handleHangUp = () => {
+    dispatch(hangUpCall());
+  };
 
   return (
     <View style={styles.container}>
       {pairedData.map((user, index) => (
         <ZegoUIKitPrebuiltCall
+          key={user._id}
           style={styles.mirroredVideo}
           appID={256539217}
           appSign={
             '920385abe4c02ddc0f93a1458839ed61845768d4ed4fcd776ca5ea5efff10925'
           }
-          userID={userId}
+          userID={user._id}
           userName={`${user.username}`}
           callID={'group123'}
           config={{
             ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
-
-            onHangUp: () => {
-              props.navigation.navigate('Feedback');
-            },
-            turnOnCameraWhenJoining: true,
+            onHangUp: handleHangUp,
+            turnOnCameraWhenJoining: false,
             turnOnMicrophoneWhenJoining: false,
             useSpeakerWhenJoining: true,
-            avatarBuilder: ({userInfo}) => {
-              return (
-                <View style={{width: '100%', height: '100%'}}>
+
+            avatarBuilder: ({userInfo}) => (
+              <View style={{width: '100%', height: '100%'}}>
+                {user.profileImage && (
                   <Image
                     style={{width: '100%', height: '100%'}}
                     resizeMode="cover"
-                    source={{
-                      uri: `${user.profileImage}`,
-                    }}
+                    source={{uri: user.profileImage}}
                   />
-                </View>
-              );
-            },
+                )}
+              </View>
+            ),
           }}
         />
       ))}
@@ -57,21 +67,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  userContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   mirroredVideo: {
     transform: [{scaleX: -1}],

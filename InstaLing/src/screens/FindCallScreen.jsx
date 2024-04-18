@@ -84,7 +84,7 @@ function FindCallScreen() {
       }
 
       const response = await fetch(
-        `https://strangerbackend.onrender.com/auth/getrandom`,
+        `https://stranger-backend.onrender.com/auth/getrandom`,
         {
           headers: {
             Authorization: token,
