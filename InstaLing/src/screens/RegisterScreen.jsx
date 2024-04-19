@@ -285,7 +285,7 @@ function RegisterScreen() {
                     <Text style={styles.errorText}>{errors.phone}</Text>
                   )}
                 </View>
-                <Pressable
+                <TouchableOpacity
                   style={{
                     width: '100%',
                     marginTop: 30,
@@ -304,7 +304,7 @@ function RegisterScreen() {
                     }}>
                     Register
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
                 <Pressable
                   onPress={() => navigation.navigate('Login')}
                   style={{margin: 10}}>

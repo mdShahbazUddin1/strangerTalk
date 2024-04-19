@@ -1,4 +1,3 @@
-// reducers.js
 import {HANG_UP_CALL} from './actions';
 
 const initialState = {
@@ -10,7 +9,12 @@ const callReducer = (state = initialState, action) => {
     case HANG_UP_CALL:
       return {
         ...state,
-        callActive: false,
+        callActive: false, // Set callActive to false when call is ended
+      };
+    case 'SET_CALL_ACTIVE':
+      return {
+        ...state,
+        callActive: action.payload, // Set callActive based on the payload
       };
     default:
       return state;

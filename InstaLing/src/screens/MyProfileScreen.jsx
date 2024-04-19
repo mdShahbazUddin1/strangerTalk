@@ -251,7 +251,7 @@ function MyProfileScreen() {
               />
             </View>
 
-            <Pressable
+            <TouchableOpacity
               style={{
                 alignItems: 'center',
                 marginTop: 30,
@@ -260,7 +260,7 @@ function MyProfileScreen() {
               }}
               onPress={handleUpdateProfile}>
               <Text style={{color: '#ffffff'}}>Save Changes</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

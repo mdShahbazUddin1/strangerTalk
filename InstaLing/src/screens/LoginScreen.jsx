@@ -249,7 +249,7 @@ const LoginScreen = () => {
                     </Pressable>
                   </View>
                 </View>
-                <Pressable
+                <TouchableOpacity
                   style={{
                     width: '100%',
                     marginTop: 30,
@@ -268,7 +268,7 @@ const LoginScreen = () => {
                     }}>
                     Login
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
                 <Pressable
                   onPress={() => navigation.navigate('Register')}
                   style={{marginTop: 10}}>

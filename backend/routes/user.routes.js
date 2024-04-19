@@ -10,6 +10,7 @@ const {
   updateProfile,
   getSingleUser,
   logout,
+  disconnectUsers,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -38,5 +39,6 @@ userRoute.put(
   updateProfile
 );
 userRoute.get("/logout", auth, logout);
+userRoute.get("/disconnect", auth, disconnectUsers);
 
 module.exports = userRoute;

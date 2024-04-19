@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const connection = require("./config/DB");
 const userRoute = require("./routes/user.routes");
+const historyRoute = require("./routes/callHistory.routes");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/auth", userRoute);
+app.use("/call", historyRoute);
 
 app.listen(PORT, async () => {
   try {

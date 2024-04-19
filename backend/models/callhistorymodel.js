@@ -12,12 +12,11 @@ const callHistorySchema = mongoose.Schema({
     required: true,
   },
   call_duration: {
-    type: Number,
+    type: String,
     required: true,
   },
   call_datetime: {
     type: Date,
-    required: true,
     default: Date.now,
   },
 });

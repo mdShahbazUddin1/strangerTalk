@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   ZegoUIKitPrebuiltCall,
@@ -6,23 +6,68 @@ import {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 import {StyleSheet, View, Image} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 import {hangUpCall} from '../redux/actions';
+import {disconnectCall, saveCallHistory} from '../utils/api';
 
 export default function CallScreen({pairedData}) {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const callActive = useSelector(state => state.callActive);
+  const isFocused = useIsFocused();
+  const [callDuration, setCallDuration] = useState(0);
+
+  let timer;
 
   useEffect(() => {
-    if (!callActive) {
+    timer = setInterval(() => {
+      setCallDuration(prevDuration => prevDuration + 1); // Increment call duration every second
+    }, 1000);
+
+    return () => clearInterval(timer); // Cleanup the interval on unmount
+  }, []);
+
+  useEffect(() => {
+    if (!callActive && isFocused) {
       navigation.replace('Feedback');
     }
-  }, [callActive, navigation]);
+  }, [callActive, isFocused, navigation]);
 
-  const handleHangUp = () => {
-    dispatch(hangUpCall());
+  const formatTime = time => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  const handleHangUp = async () => {
+    dispatch(hangUpCall());
+    disconnectCall();
+    clearInterval(timer);
+    const formattedDuration = formatTime(callDuration);
+    const randomUser = pairedData[1];
+
+    if (randomUser) {
+      try {
+        // Send call duration to the backend
+        const response = await saveCallHistory(
+          randomUser._id,
+          formattedDuration,
+        );
+        console.log(response); // Log the response from the backend
+      } catch (error) {
+        console.error(error); // Log any errors
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!callActive && isFocused) {
+      dispatch({type: 'SET_CALL_ACTIVE', payload: true}); // Set callActive to true when component mounts or becomes focused
+    }
+  }, [dispatch, callActive, isFocused]);
 
   return (
     <View style={styles.container}>

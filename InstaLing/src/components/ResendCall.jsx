@@ -9,8 +9,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useNavigation} from '@react-navigation/native';
 
 function ResendCall({resendUser}) {
+  const navigation = useNavigation();
   return (
     <View style={{marginTop: 15}}>
       <View
@@ -49,8 +51,24 @@ function ResendCall({resendUser}) {
         showsHorizontalScrollIndicator={false}
         style={{marginTop: 5}}>
         {resendUser?.map((user, index) => (
-          <Pressable key={index} style={styles.imageContainer}>
-            <Image style={styles.image} source={{uri: user.bg}} />
+          <TouchableOpacity
+            key={index}
+            style={styles.imageContainer}
+            onPress={() =>
+              navigation.navigate('CallDetails', {
+                callId: user._id,
+                username: user.receiver_user_id.username,
+                email: user.receiver_user_id.email,
+                backgroundImage: user.receiver_user_id.backgroundImage,
+                profileImage: user.receiver_user_id.profileImage,
+                call_duration: user.call_duration,
+                call_datetime: user.call_datetime,
+              })
+            }>
+            <Image
+              style={styles.image}
+              source={{uri: user.receiver_user_id.backgroundImage}}
+            />
             <View
               style={{
                 width: '100%',
@@ -69,14 +87,14 @@ function ResendCall({resendUser}) {
                     fontSize: 12,
                     fontWeight: '700',
                   }}>
-                  {user.name}
+                  {user.receiver_user_id.username}
                 </Text>
               </View>
               <View>
                 <View>
                   <Image
                     style={{width: 50, height: 50, borderRadius: 50}}
-                    source={{uri: user.img}}
+                    source={{uri: user.receiver_user_id.profileImage}}
                   />
                 </View>
                 <View style={{paddingTop: 5, flexDirection: 'row'}}>
@@ -87,7 +105,7 @@ function ResendCall({resendUser}) {
                 </View>
               </View>
             </View>
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>

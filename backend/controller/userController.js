@@ -4,6 +4,17 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const { BlackListModel } = require("../models/blacklist");
+require("dotenv").config();
+const AWS = require("aws-sdk");
+const uuid = require("uuid");
+
+AWS.config.update({
+  accessKeyId: process.env.AWSACCESSKEYID,
+  secretAccessKey: process.env.AWSSECRETKEY,
+  region: process.env.AWSREGION,
+});
+
+const s3 = new AWS.S3();
 
 const registerValidation = [
   // Validate username
@@ -146,26 +157,62 @@ const getRandomUsers = async (req, res) => {
   }
 };
 
+const disconnectUsers = async (req, res) => {
+  try {
+    const currentUser = req.user;
+
+    // Find the current user and update searching and connected status to false
+    const currentUserDocument = await UserModel.findOneAndUpdate(
+      { _id: currentUser._id },
+      { $set: { searching: false, connected: false } },
+      { new: true }
+    );
+
+    if (!currentUserDocument) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User disconnected successfully" });
+  } catch (error) {
+    // Handle errors
+    return res.status(500).json({ message: "Error: " + error.message });
+  }
+};
+
 const updateProfile = async (req, res) => {
   try {
     const { username, phone, email } = req.body;
     const userId = req.userId;
 
-    let profileDataURL = null;
-    let backgroundDataURL = null;
+    let profileURL = null;
+    let backgroundURL = null;
     if (req.files) {
       const profileImageFile = req.files["profileImage"];
       if (profileImageFile) {
         const profileImageBuffer = profileImageFile[0].buffer;
-        const profileImageBase64 = profileImageBuffer.toString("base64");
-        profileDataURL = `data:${profileImageFile[0].mimetype};base64,${profileImageBase64}`;
+        const profileKey = `images/${uuid.v4()}-${
+          profileImageFile[0].originalname
+        }`;
+        await uploadToS3(
+          profileKey,
+          profileImageBuffer,
+          profileImageFile[0].mimetype
+        );
+        profileURL = `https://blog-website-s3.s3.amazonaws.com/${profileKey}`;
       }
 
       const backgroundImageFile = req.files["backgroundImage"];
       if (backgroundImageFile) {
         const backgroundImageBuffer = backgroundImageFile[0].buffer;
-        const backgroundImageBase64 = backgroundImageBuffer.toString("base64");
-        backgroundDataURL = `data:${backgroundImageFile[0].mimetype};base64,${backgroundImageBase64}`;
+        const backgroundKey = `images/${uuid.v4()}-${
+          backgroundImageFile[0].originalname
+        }`;
+        await uploadToS3(
+          backgroundKey,
+          backgroundImageBuffer,
+          backgroundImageFile[0].mimetype
+        );
+        backgroundURL = `https://blog-website-s3.s3.amazonaws.com/${backgroundKey}`;
       }
     }
 
@@ -178,8 +225,8 @@ const updateProfile = async (req, res) => {
     updateProfile.username = username;
     updateProfile.phone = phone;
     updateProfile.email = email;
-    updateProfile.backgroundImage = backgroundDataURL;
-    updateProfile.profileImage = profileDataURL;
+    updateProfile.backgroundImage = backgroundURL;
+    updateProfile.profileImage = profileURL;
 
     await updateProfile.save();
 
@@ -192,6 +239,27 @@ const updateProfile = async (req, res) => {
       .status(500)
       .send({ msg: "Internal server error", error: error.message });
   }
+};
+
+const uploadToS3 = (key, buffer, mimetype) => {
+  return new Promise((resolve, reject) => {
+    const s3 = new AWS.S3();
+    s3.putObject(
+      {
+        Bucket: "blog-website-s3",
+        Key: key,
+        Body: buffer,
+        ContentType: mimetype,
+      },
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      }
+    );
+  });
 };
 
 const logout = async (req, res) => {
@@ -221,5 +289,6 @@ module.exports = {
   getRandomUsers,
   updateProfile,
   getSingleUser,
+  disconnectUsers,
   logout,
 };

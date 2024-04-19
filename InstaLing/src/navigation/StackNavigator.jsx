@@ -14,6 +14,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import CallDetails from '../screens/CallDetails';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -90,6 +91,11 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Feedback"
           component={FeedBackForm}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="CallDetails"
+          component={CallDetails}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
