@@ -178,6 +178,99 @@ const disconnectUsers = async (req, res) => {
     return res.status(500).json({ message: "Error: " + error.message });
   }
 };
+const followUser = async (req, res) => {
+  const { userIdToFollow } = req.params;
+  const currentUserId = req.userId;
+
+  try {
+    // Find the current user by ID
+    const currentUser = await UserModel.findById(currentUserId);
+
+    if (!currentUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check if the user to be followed exists
+    const userToFollow = await UserModel.findById(userIdToFollow);
+
+    if (!userToFollow) {
+      return res.status(404).send({ message: "User to follow not found" });
+    }
+
+    // Check if the current user is already following the user
+    if (currentUser.following.includes(userIdToFollow)) {
+      return res.status(400).send({ message: "User already followed" });
+    }
+
+    // Add the user ID of the user to be followed to the following array of the current user
+    currentUser.following.push(userIdToFollow);
+    await currentUser.save();
+
+    // Add the current user's ID to the followers array of the user being followed
+    userToFollow.followers.push(currentUserId);
+    await userToFollow.save();
+
+    return res.status(200).send({ message: "User followed successfully" });
+  } catch (error) {
+    return res.status(500).send({ message: "Error: " + error.message });
+  }
+};
+
+const checkFollowStatus = async (req, res) => {
+  const { userId } = req.params;
+  const currentUserId = req.userId; // Assuming you have middleware to extract user ID from token
+
+  try {
+    const currentUser = await UserModel.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const isFollowed =
+      currentUser.following.includes(userId) && currentUserId !== userId;
+
+    if (isFollowed) {
+      return res.status(200).send({ followed: true });
+    } else {
+      return res.status(201).send({ followed: false });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: "Error: " + error.message });
+  }
+};
+
+const getMutualFriends = async (req, res) => {
+  const currentUserId = req.userId;
+
+  try {
+    // Find the current user by ID
+    const currentUser = await UserModel.findById(currentUserId);
+
+    if (!currentUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Get the IDs of users who are following the current user
+    const followersOfCurrentUser = currentUser.followers;
+
+    // Get the IDs of users who the current user is following
+    const followingOfCurrentUser = currentUser.following;
+
+    // Find users who are mutually following each other
+    const mutualFriends = [];
+
+    for (const followerId of followersOfCurrentUser) {
+      if (followingOfCurrentUser.includes(followerId)) {
+        const mutualFriend = await UserModel.findById(followerId);
+        mutualFriends.push(mutualFriend);
+      }
+    }
+
+    return res.status(200).send(mutualFriends);
+  } catch (error) {
+    return res.status(500).send({ message: "Error: " + error.message });
+  }
+};
 
 const updateProfile = async (req, res) => {
   try {
@@ -289,6 +382,9 @@ module.exports = {
   getRandomUsers,
   updateProfile,
   getSingleUser,
+  followUser,
+  getMutualFriends,
+  checkFollowStatus,
   disconnectUsers,
   logout,
 };

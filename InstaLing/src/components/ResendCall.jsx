@@ -56,7 +56,7 @@ function ResendCall({resendUser}) {
             style={styles.imageContainer}
             onPress={() =>
               navigation.navigate('CallDetails', {
-                callId: user._id,
+                callId: user.receiver_user_id._id,
                 username: user.receiver_user_id.username,
                 email: user.receiver_user_id.email,
                 backgroundImage: user.receiver_user_id.backgroundImage,

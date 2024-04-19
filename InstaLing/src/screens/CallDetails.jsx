@@ -1,9 +1,11 @@
-import React, {useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const CallDetails = ({route}) => {
   const {
+    callId,
     username,
     email,
     backgroundImage,
@@ -13,7 +15,7 @@ const CallDetails = ({route}) => {
   } = route.params;
   const [showGivenComments, setShowGivenComments] = useState(true);
 
-  // Function to format the call time to display in 12-hour format
+  const [isFollowed, setIsFollowed] = useState(false);
   const formatCallTime = time => {
     const date = new Date(time);
     const hours = date.getHours();
@@ -22,6 +24,62 @@ const CallDetails = ({route}) => {
     const formattedHours = hours % 12 || 12;
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     return `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+  };
+
+  const checkFollowStatus = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/checkfollow/${callId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token,
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+
+        setIsFollowed(data.followed);
+      } else {
+        setIsFollowed(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    checkFollowStatus();
+  }, []);
+
+  const handleFollowUser = async () => {
+    const token = await AsyncStorage.getItem('token');
+
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/follow/${callId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application-json',
+            Authorization: token,
+          },
+        },
+      );
+      if (response.status === 400) {
+        console.log('User already followed');
+      }
+      if (response.status === 200) {
+        setIsFollowed(true);
+        checkFollowStatus();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -162,7 +220,9 @@ const CallDetails = ({route}) => {
               padding: 8,
               borderRadius: 4,
               marginTop: 30,
-            }}>
+            }}
+            onPress={handleFollowUser}
+            disabled={isFollowed}>
             <Text
               style={{
                 fontSize: 13,
@@ -171,7 +231,7 @@ const CallDetails = ({route}) => {
                 textAlign: 'center',
                 color: '#6D31EDFF',
               }}>
-              Following
+              {isFollowed ? 'Following' : 'Follow'}
             </Text>
           </TouchableOpacity>
         </View>

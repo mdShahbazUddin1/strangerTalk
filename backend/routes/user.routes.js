@@ -11,6 +11,9 @@ const {
   getSingleUser,
   logout,
   disconnectUsers,
+  followUser,
+  getMutualFriends,
+  checkFollowStatus,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -40,5 +43,9 @@ userRoute.put(
 );
 userRoute.get("/logout", auth, logout);
 userRoute.get("/disconnect", auth, disconnectUsers);
+userRoute.post("/follow/:userIdToFollow", auth, followUser);
+
+userRoute.get("/friendlist", auth, getMutualFriends);
+userRoute.get("/checkfollow/:userId", auth, checkFollowStatus);
 
 module.exports = userRoute;
