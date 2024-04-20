@@ -12,8 +12,13 @@ import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useRoute} from '@react-navigation/native';
 
 function FeedBackForm() {
+  const route = useRoute();
+  const {userId, username, profileImage} = route.params;
+
+  const [rating, setRating] = useState(0);
   const interests = [
     'Character Development',
     'Plot & Storyline',
@@ -28,6 +33,10 @@ function FeedBackForm() {
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [thoughts, setThoughts] = useState('');
   const navigation = useNavigation();
+  console.log(profileImage);
+  const handleStarClick = value => {
+    setRating(value);
+  };
 
   const toggleInterest = interest => {
     if (selectedInterests.includes(interest)) {
@@ -38,6 +47,35 @@ function FeedBackForm() {
   };
   const handleCancel = () => {
     navigation.replace('Main');
+  };
+  const saveFeedBack = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/feedback/save/${userId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+            Authorization: token,
+          },
+          body: JSON.stringify({
+            rating: rating,
+            feedbackContent: {
+              options: selectedInterests,
+              comment: thoughts,
+            },
+          }),
+        },
+      );
+
+      if (response.status === 200) {
+        console.log('Feedback submitted successfully');
+        navigation.replace('Main');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -75,13 +113,13 @@ function FeedBackForm() {
                 color: '#171A1FFF',
                 lineHeight: 36,
               }}>
-              Syed
+              {username}
             </Text>
             <View style={{marginTop: 10, alignItems: 'center'}}>
               <Image
                 style={{width: 100, height: 100, borderRadius: 50}}
                 source={{
-                  uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmFvsTU3oFayIDR7Amtxqh-No6UhNpolgVCSFk2dl01g&s',
+                  uri: profileImage,
                 }}
               />
               <Text
@@ -97,19 +135,26 @@ function FeedBackForm() {
                 Write a review...
               </Text>
             </View>
-            <View
-              style={{
-                paddingTop: 8,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-evenly',
-                gap: 20,
-              }}>
-              <AntDesign name="star" size={12} color="orange" />
-              <AntDesign name="star" size={12} color="orange" />
-              <AntDesign name="star" size={12} color="orange" />
-              <AntDesign name="star" size={12} color="orange" />
-              <AntDesign name="star" size={12} color="orange" />
+            <View style={{alignItems: 'center', marginTop: 15}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-evenly',
+                  marginTop: 10,
+                }}>
+                {[1, 2, 3, 4, 5].map(value => (
+                  <TouchableOpacity
+                    key={value}
+                    onPress={() => handleStarClick(value)}>
+                    <AntDesign
+                      name="star"
+                      size={30}
+                      color={value <= rating ? 'orange' : 'gray'}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </View>
 
@@ -148,23 +193,17 @@ function FeedBackForm() {
 
           {/* Textarea for thoughts */}
           <View style={{marginTop: 15}}>
-            <Text
-              style={{
-                color: '#171A1FFF',
-                fontWeight: '500',
-                fontSize: 20,
-                fontFamily: 'sans-serif',
-              }}>
-              Your thoughts about the call?
-            </Text>
+            {/* Remaining code */}
             <TextInput
               style={styles.textArea}
               placeholder="Write your thoughts here..."
+              placeholderTextColor={'gray'}
               multiline={true}
               onChangeText={text => setThoughts(text)}
               value={thoughts}
             />
             <TouchableOpacity
+              onPress={saveFeedBack}
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -209,6 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 150, // Adjust height as needed
     textAlignVertical: 'top', // Align the text to the top
+    color: 'gray',
   },
 });
 

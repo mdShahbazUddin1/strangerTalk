@@ -59,10 +59,12 @@ function ResendCall({resendUser}) {
                 callId: user.receiver_user_id._id,
                 username: user.receiver_user_id.username,
                 email: user.receiver_user_id.email,
+                receiver_user_id: user.receiver_user_id._id,
                 backgroundImage: user.receiver_user_id.backgroundImage,
                 profileImage: user.receiver_user_id.profileImage,
                 call_duration: user.call_duration,
                 call_datetime: user.call_datetime,
+                followers: user.receiver_user_id.followers,
               })
             }>
             <Image

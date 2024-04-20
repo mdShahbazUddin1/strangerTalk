@@ -16,6 +16,7 @@ export default function CallScreen({pairedData}) {
   const callActive = useSelector(state => state.callActive);
   const isFocused = useIsFocused();
   const [callDuration, setCallDuration] = useState(0);
+  const [randomUser, setRandomUser] = useState(null);
 
   let timer;
 
@@ -28,10 +29,14 @@ export default function CallScreen({pairedData}) {
   }, []);
 
   useEffect(() => {
-    if (!callActive && isFocused) {
-      navigation.replace('Feedback');
+    if (!callActive && isFocused && randomUser) {
+      navigation.replace('Feedback', {
+        userId: randomUser._id,
+        username: randomUser.username,
+        profileImage: randomUser.profileImage,
+      });
     }
-  }, [callActive, isFocused, navigation]);
+  }, [callActive, isFocused, navigation, randomUser]);
 
   const formatTime = time => {
     const hours = Math.floor(time / 3600);
@@ -50,6 +55,7 @@ export default function CallScreen({pairedData}) {
     const randomUser = pairedData[1];
 
     if (randomUser) {
+      setRandomUser(randomUser);
       try {
         // Send call duration to the backend
         const response = await saveCallHistory(
@@ -80,16 +86,16 @@ export default function CallScreen({pairedData}) {
             '920385abe4c02ddc0f93a1458839ed61845768d4ed4fcd776ca5ea5efff10925'
           }
           userID={user._id}
-          userName={`${user.username}`}
+          userName={user.username}
           callID={'group123'}
           config={{
             ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
             onHangUp: handleHangUp,
-            turnOnCameraWhenJoining: false,
-            turnOnMicrophoneWhenJoining: false,
+            turnOnCameraWhenJoining: true,
+            turnOnMicrophoneWhenJoining: true,
             useSpeakerWhenJoining: true,
 
-            avatarBuilder: ({userInfo}) => (
+            avatarBuilder: () => (
               <View style={{width: '100%', height: '100%'}}>
                 {user.profileImage && (
                   <Image

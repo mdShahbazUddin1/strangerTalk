@@ -1,6 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const CallDetails = ({route}) => {
@@ -8,12 +15,14 @@ const CallDetails = ({route}) => {
     callId,
     username,
     email,
+    receiver_user_id,
     backgroundImage,
     profileImage,
     call_duration,
     call_datetime,
+    followers,
   } = route.params;
-  const [showGivenComments, setShowGivenComments] = useState(true);
+  const [feedback, setFeedBack] = useState([]);
 
   const [isFollowed, setIsFollowed] = useState(false);
   const formatCallTime = time => {
@@ -24,6 +33,30 @@ const CallDetails = ({route}) => {
     const formattedHours = hours % 12 || 12;
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     return `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+  };
+
+  const getRandomAllFeedBack = async () => {
+    const token = await AsyncStorage.getItem('token');
+    console.log(receiver_user_id);
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/feedback/getfeedbackofrandom/${receiver_user_id}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: token,
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setFeedBack(data.feedback);
+        // console.log('feedback', data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const checkFollowStatus = async () => {
@@ -54,6 +87,7 @@ const CallDetails = ({route}) => {
 
   useEffect(() => {
     checkFollowStatus();
+    getRandomAllFeedBack();
   }, []);
 
   const handleFollowUser = async () => {
@@ -159,7 +193,7 @@ const CallDetails = ({route}) => {
                           fontWeight: '700',
                           color: '#323743FF',
                         }}>
-                        1,634 followers
+                        {followers.length} followers
                       </Text>
                     </View>
                   </View>
@@ -245,33 +279,77 @@ const CallDetails = ({route}) => {
             <Text style={styles.callText}>{call_duration}</Text>
           </View>
         </View>
-
-        <View style={styles.commentsContainer}>
-          <TouchableOpacity onPress={() => setShowGivenComments(true)}>
-            <Text
-              style={[
-                styles.commentOption,
-                showGivenComments ? styles.activeOption : null,
-              ]}>
-              Given
-            </Text>
+      </View>
+      <View style={{flex: 1, margin: 15}}>
+        <View style={{margin: 0}}>
+          <TouchableOpacity>
+            <Text style={styles.commentOption}>Received</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowGivenComments(false)}>
-            <Text
-              style={[
-                styles.commentOption,
-                !showGivenComments ? styles.activeOption : null,
-              ]}>
-              Received
-            </Text>
-          </TouchableOpacity>
-          {/* Display given or received comments based on the state */}
-          {showGivenComments ? (
-            <Text style={styles.commentText}>Given comments here</Text>
-          ) : (
-            <Text style={styles.commentText}>Received comments here</Text>
-          )}
         </View>
+        {/* Display given or received comments based on the state */}
+        <ScrollView style={{flex: 1}}>
+          {feedback.length === 0 ? (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 20,
+              }}>
+              <Text
+                style={{
+                  color: 'black',
+                }}>
+                No Feedback available !
+              </Text>
+            </View>
+          ) : (
+            feedback.map(feedbackItem => (
+              <View
+                key={feedbackItem._id}
+                style={{
+                  marginTop: 0,
+                  marginBottom: 5,
+                }}>
+                <Text
+                  style={{
+                    color: 'black',
+                    fontWeight: '700',
+                    fontFamily: 'sans-serif',
+                  }}>
+                  {feedbackItem.caller_user_id.username}
+                </Text>
+                {/* Render options */}
+                {feedbackItem.feedbackContent.options.map(option => (
+                  <Text
+                    key={option} // Ensure each option has a unique key
+                    style={{
+                      color: 'black',
+                      marginTop: 5,
+                      fontFamily: 'sans-serif',
+                      fontSize: 13,
+                      padding: 7,
+                      backgroundColor: '#F5F5F5',
+                    }}>
+                    {option}
+                  </Text>
+                ))}
+                {/* Render comment */}
+                <Text
+                  style={{
+                    color: 'black',
+                    marginTop: 5,
+                    fontFamily: 'sans-serif',
+                    fontSize: 13,
+                    padding: 7,
+                    backgroundColor: '#F5F5F5',
+                  }}>
+                  {feedbackItem.feedbackContent.comment}
+                </Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
       </View>
     </View>
   );
@@ -284,7 +362,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   backgroundImage: {
-    flex: 0.3, // Reduce height
+    flex: 0.8, // Reduce height
     resizeMode: 'cover',
     justifyContent: 'center',
   },
@@ -356,7 +434,6 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   commentsContainer: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: 'white',
@@ -373,7 +450,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   commentText: {
-    marginTop: 10,
+    marginTop: 1,
     fontSize: 16,
     color: 'black',
   },

@@ -11,17 +11,12 @@ const feedbackSchema = mongoose.Schema({
     ref: "User",
     required: true,
   },
-  call_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CallHistory",
-    required: true,
-  },
   rating: {
     type: Number,
-    required: true,
   },
-  comment: {
-    type: String,
+  feedbackContent: {
+    options: [String],
+    comment: String,
   },
   feedback_datetime: {
     type: Date,
