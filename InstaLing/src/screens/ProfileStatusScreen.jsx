@@ -9,99 +9,41 @@ import {
   ScrollView,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {getRandomAllFeedBack} from '../utils/api';
+import {getGivenFeedBack, getRandomAllFeedBack} from '../utils/api';
 
-const CallDetails = ({route}) => {
+const ProfileStatusScreen = ({route}) => {
   const {
-    callId,
+    userId,
     username,
     email,
-    receiver_user_id,
     backgroundImage,
     profileImage,
-    call_duration,
-    call_datetime,
     followers,
+    following,
   } = route.params;
   const [feedback, setFeedBack] = useState([]);
+  const [activeTab, setActiveTab] = useState('Received');
 
-  const [isFollowed, setIsFollowed] = useState(false);
-  const formatCallTime = time => {
-    const date = new Date(time);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const amOrPm = hours >= 12 ? 'PM' : 'AM';
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${formattedHours}:${formattedMinutes} ${amOrPm}`;
-  };
-
-  const getAllFeedBack = async () => {
+  const recievedFeedBack = async () => {
     try {
-      const userFeedback = await getRandomAllFeedBack(receiver_user_id);
-      console.log(userFeedback);
-      setFeedBack(userFeedback);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const checkFollowStatus = async () => {
-    const token = await AsyncStorage.getItem('token');
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/checkfollow/${callId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        },
-      );
-
-      if (response.status === 200) {
-        const data = await response.json();
-
-        setIsFollowed(data.followed);
+      if (activeTab === 'Received') {
+        const recievedFeed = await getRandomAllFeedBack(userId);
+        setFeedBack(recievedFeed);
       } else {
-        setIsFollowed(false);
+        const givenFeedback = await getGivenFeedBack();
+        setFeedBack(givenFeedback);
       }
     } catch (error) {
       console.log(error);
     }
+  };
+  const handleTabPress = tab => {
+    setActiveTab(tab);
   };
 
   useEffect(() => {
-    checkFollowStatus();
-    getAllFeedBack();
-  }, []);
-
-  const handleFollowUser = async () => {
-    const token = await AsyncStorage.getItem('token');
-
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/follow/${callId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application-json',
-            Authorization: token,
-          },
-        },
-      );
-      if (response.status === 400) {
-        console.log('User already followed');
-      }
-      if (response.status === 200) {
-        setIsFollowed(true);
-        checkFollowStatus();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    recievedFeedBack();
+  }, [activeTab]);
 
   return (
     <View style={styles.container}>
@@ -167,6 +109,7 @@ const CallDetails = ({route}) => {
                         {username}
                       </Text>
                     </View>
+
                     <View
                       style={{
                         backgroundColor: '#F3F4F6FF',
@@ -184,132 +127,80 @@ const CallDetails = ({route}) => {
                       </Text>
                     </View>
                   </View>
-                  <View>
-                    <View
-                      style={{backgroundColor: '#F5F1FEFF', borderRadius: 10}}>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          fontFamily: 'sans-serif',
-                          lineHeight: 11,
-                          fontWeight: '700',
-                          color: 'green',
-                          padding: 4,
-                          paddingHorizontal: 12,
-                          marginTop: 5,
-                        }}>
-                        online
-                      </Text>
-                    </View>
+
+                  <View
+                    style={{
+                      backgroundColor: '#F3F4F6FF',
+                      padding: 4,
+                      borderRadius: 5,
+                    }}>
+                    <Text
+                      style={{
+                        fontFamily: 'sans-serif',
+                        fontSize: 11,
+                        fontWeight: '700',
+                        color: '#323743FF',
+                      }}>
+                      {following.length} followings
+                    </Text>
                   </View>
                 </View>
               </View>
             </View>
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 30,
-          }}>
-          <TouchableOpacity
-            style={{
-              width: 150,
-              backgroundColor: '#6D31EDFF',
-              padding: 8,
-              borderRadius: 4,
-              marginTop: 30,
-            }}>
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                fontFamily: 'sans-serif',
-                textAlign: 'center',
-                color: '#ffffff',
-              }}>
-              Call
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              width: 150,
-              borderWidth: 1,
-              borderColor: '#6D31EDFF',
-              padding: 8,
-              borderRadius: 4,
-              marginTop: 30,
-            }}
-            onPress={handleFollowUser}
-            disabled={isFollowed}>
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                fontFamily: 'sans-serif',
-                textAlign: 'center',
-                color: '#6D31EDFF',
-              }}>
-              {isFollowed ? 'Following' : 'Follow'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.callInfo}>
-          <View style={styles.callDetails}>
-            <AntDesign name="clockcircleo" size={18} color="white" />
-            <Text style={styles.callText}>{formatCallTime(call_datetime)}</Text>
-          </View>
-          <View style={styles.callDetails}>
-            <AntDesign name="clockcircleo" size={18} color="white" />
-            <Text style={styles.callText}>{call_duration}</Text>
-          </View>
-        </View>
       </View>
-      <View style={{flex: 1, margin: 15}}>
-        <View style={{margin: 0}}>
-          <TouchableOpacity>
-            <Text style={styles.commentOption}>Received</Text>
+      <View style={{flex: 1, margin: 15, marginTop: -80}}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {/* Button for Received comments */}
+          <TouchableOpacity onPress={() => handleTabPress('Received')}>
+            <Text
+              style={[
+                styles.commentOption,
+                {color: activeTab === 'Received' ? 'green' : 'gray'},
+              ]}>
+              Received
+            </Text>
+          </TouchableOpacity>
+          {/* Button for Given comments */}
+          <TouchableOpacity onPress={() => handleTabPress('Given')}>
+            <Text
+              style={[
+                styles.commentOption,
+                {color: activeTab === 'Given' ? 'green' : 'gray'},
+              ]}>
+              Given
+            </Text>
           </TouchableOpacity>
         </View>
-        {/* Display given or received comments based on the state */}
-        <ScrollView style={{flex: 1}}>
+        {/* Display comments based on the active tab */}
+        <ScrollView style={{flex: 1, marginTop: 20}}>
           {feedback.length === 0 ? (
             <View
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: 20,
-              }}>
-              <Text
-                style={{
-                  color: 'black',
-                }}>
-                No Feedback available !
-              </Text>
+              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+              <Text style={{color: 'black'}}>No Feedback available!</Text>
             </View>
           ) : (
             feedback.map(feedbackItem => (
               <View
                 key={feedbackItem._id}
-                style={{
-                  marginTop: 0,
-                  marginBottom: 5,
-                }}>
+                style={{marginTop: 0, marginBottom: 5}}>
                 <Text
                   style={{
                     color: 'black',
                     fontWeight: '700',
                     fontFamily: 'sans-serif',
                   }}>
-                  {feedbackItem.caller_user_id.username}
+                  {activeTab === 'Received'
+                    ? feedbackItem?.caller_user_id?.username ||
+                      feedbackItem?.receiver_user_id?.username
+                    : feedbackItem?.receiver_user_id?.username ||
+                      feedbackItem?.caller_user_id?.username}
                 </Text>
                 {/* Render options */}
                 {feedbackItem.feedbackContent.options.map(option => (
                   <Text
-                    key={option} // Ensure each option has a unique key
+                    key={option}
                     style={{
                       color: 'black',
                       marginTop: 5,
@@ -321,7 +212,8 @@ const CallDetails = ({route}) => {
                     {option}
                   </Text>
                 ))}
-                {/* Render comment */}
+                {/* Render comment based on the active tab */}
+
                 <Text
                   style={{
                     color: 'black',
@@ -443,4 +335,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CallDetails;
+export default ProfileStatusScreen;

@@ -18,13 +18,11 @@ const submitFeedback = async (req, res) => {
     // Save the feedback to the database
     await newFeedback.save();
 
-    res
-      .status(200)
-      .send({
-        success: true,
-        message: "Feedback submitted successfully",
-        newFeedback,
-      });
+    res.status(200).send({
+      success: true,
+      message: "Feedback submitted successfully",
+      newFeedback,
+    });
   } catch (error) {
     console.error("Error submitting feedback:", error);
     res.status(500).json({
@@ -56,12 +54,10 @@ const getAllFeedbackByUserId = async (req, res) => {
 
 const getAllFeedbackGivenByUserId = async (req, res) => {
   const userId = req.userId;
-
   try {
     // Find all feedback where the caller_user_id matches the userId
     const feedback = await FeedbackModel.find({ caller_user_id: userId })
-      .populate("receiver_user_id", "username") // Populate receiver_user_id to get username
-      .populate("call_id") // Populate call_id to get call details
+      .populate("receiver_user_id", "username")
       .select("-_id rating feedbackContent"); // Select only necessary fields
 
     res.status(200).json({ success: true, feedback });

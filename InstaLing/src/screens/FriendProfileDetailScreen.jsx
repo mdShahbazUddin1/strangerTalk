@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -11,97 +10,30 @@ import {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {getRandomAllFeedBack} from '../utils/api';
 
-const CallDetails = ({route}) => {
+const FriendProfileDetailScreen = ({route}) => {
   const {
-    callId,
+    userId,
     username,
-    email,
-    receiver_user_id,
     backgroundImage,
     profileImage,
-    call_duration,
-    call_datetime,
     followers,
+    following,
   } = route.params;
   const [feedback, setFeedBack] = useState([]);
 
-  const [isFollowed, setIsFollowed] = useState(false);
-  const formatCallTime = time => {
-    const date = new Date(time);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const amOrPm = hours >= 12 ? 'PM' : 'AM';
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${formattedHours}:${formattedMinutes} ${amOrPm}`;
-  };
-
   const getAllFeedBack = async () => {
     try {
-      const userFeedback = await getRandomAllFeedBack(receiver_user_id);
-      console.log(userFeedback);
+      const userFeedback = await getRandomAllFeedBack(userId);
+
       setFeedBack(userFeedback);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const checkFollowStatus = async () => {
-    const token = await AsyncStorage.getItem('token');
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/checkfollow/${callId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        },
-      );
-
-      if (response.status === 200) {
-        const data = await response.json();
-
-        setIsFollowed(data.followed);
-      } else {
-        setIsFollowed(false);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    checkFollowStatus();
     getAllFeedBack();
   }, []);
-
-  const handleFollowUser = async () => {
-    const token = await AsyncStorage.getItem('token');
-
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/follow/${callId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application-json',
-            Authorization: token,
-          },
-        },
-      );
-      if (response.status === 400) {
-        console.log('User already followed');
-      }
-      if (response.status === 200) {
-        setIsFollowed(true);
-        checkFollowStatus();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -186,19 +118,19 @@ const CallDetails = ({route}) => {
                   </View>
                   <View>
                     <View
-                      style={{backgroundColor: '#F5F1FEFF', borderRadius: 10}}>
+                      style={{
+                        backgroundColor: '#F3F4F6FF',
+                        padding: 4,
+                        borderRadius: 5,
+                      }}>
                       <Text
                         style={{
-                          fontSize: 12,
                           fontFamily: 'sans-serif',
-                          lineHeight: 11,
+                          fontSize: 11,
                           fontWeight: '700',
-                          color: 'green',
-                          padding: 4,
-                          paddingHorizontal: 12,
-                          marginTop: 5,
+                          color: '#323743FF',
                         }}>
-                        online
+                        {following.length} followings
                       </Text>
                     </View>
                   </View>
@@ -241,9 +173,7 @@ const CallDetails = ({route}) => {
               padding: 8,
               borderRadius: 4,
               marginTop: 30,
-            }}
-            onPress={handleFollowUser}
-            disabled={isFollowed}>
+            }}>
             <Text
               style={{
                 fontSize: 13,
@@ -252,19 +182,9 @@ const CallDetails = ({route}) => {
                 textAlign: 'center',
                 color: '#6D31EDFF',
               }}>
-              {isFollowed ? 'Following' : 'Follow'}
+              Friends
             </Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.callInfo}>
-          <View style={styles.callDetails}>
-            <AntDesign name="clockcircleo" size={18} color="white" />
-            <Text style={styles.callText}>{formatCallTime(call_datetime)}</Text>
-          </View>
-          <View style={styles.callDetails}>
-            <AntDesign name="clockcircleo" size={18} color="white" />
-            <Text style={styles.callText}>{call_duration}</Text>
-          </View>
         </View>
       </View>
       <View style={{flex: 1, margin: 15}}>
@@ -273,8 +193,8 @@ const CallDetails = ({route}) => {
             <Text style={styles.commentOption}>Received</Text>
           </TouchableOpacity>
         </View>
-        {/* Display given or received comments based on the state */}
-        <ScrollView style={{flex: 1}}>
+
+        <ScrollView style={{flex: 1, marginTop: 10}}>
           {feedback.length === 0 ? (
             <View
               style={{
@@ -443,4 +363,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CallDetails;
+export default FriendProfileDetailScreen;

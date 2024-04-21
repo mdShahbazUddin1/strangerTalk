@@ -7,49 +7,7 @@ import ResendCall from '../components/ResendCall';
 import UserGames from '../components/UserGames';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getCallHistory} from '../utils/api';
-
-const user = [
-  {
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmFvsTU3oFayIDR7Amtxqh-No6UhNpolgVCSFk2dl01g&s',
-    name: 'adam',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmVzc2lvbmFsJTIwcHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D',
-    name: 'Zoya',
-  },
-  {
-    img: 'https://st4.depositphotos.com/16122460/20401/i/450/depositphotos_204010926-stock-photo-beautiful-young-woman-santa-hat.jpg',
-    name: 'Emile',
-  },
-  {
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsVGia80mDB4rpewJxgFplSvUYbdumAsohsuSZKzmzyw&s',
-    name: 'John_Doe',
-  },
-  {
-    img: 'https://cdn.openart.ai/published/8RyOnLDZw11dmqk6wvHF/QrFoLVlW_d4HS_1024.webp',
-    name: 'Jay',
-  },
-  {
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmFvsTU3oFayIDR7Amtxqh-No6UhNpolgVCSFk2dl01g&s',
-    name: 'adam',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmVzc2lvbmFsJTIwcHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D',
-    name: 'Zoya',
-  },
-  {
-    img: 'https://st4.depositphotos.com/16122460/20401/i/450/depositphotos_204010926-stock-photo-beautiful-young-woman-santa-hat.jpg',
-    name: 'Emile',
-  },
-  {
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsVGia80mDB4rpewJxgFplSvUYbdumAsohsuSZKzmzyw&s',
-    name: 'John_Doe',
-  },
-  {
-    img: 'https://cdn.openart.ai/published/8RyOnLDZw11dmqk6wvHF/QrFoLVlW_d4HS_1024.webp',
-    name: 'Jay',
-  },
-];
+import FriendsProfile from '../components/FriendsProfile';
 
 function HomeScreen() {
   const [recentCall, setRecentCall] = useState([]);
@@ -104,13 +62,8 @@ function HomeScreen() {
         </View>
         {/* status */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {user.map((user, index) =>
-            index === 0 ? (
-              <UserStatus user={user} index={index} key={index} />
-            ) : (
-              <UserStatus user={user} index={index} key={index} />
-            ),
-          )}
+          <UserStatus />
+          <FriendsProfile />
         </ScrollView>
 
         {/* Recent Call */}

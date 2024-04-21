@@ -15,6 +15,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import CallDetails from '../screens/CallDetails';
+import ProfileStatusScreen from '../screens/ProfileStatusScreen';
+import FriendProfileDetailScreen from '../screens/FriendProfileDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -96,6 +98,16 @@ const StackNavigator = () => {
         <Stack.Screen
           name="CallDetails"
           component={CallDetails}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="ProfileStatusScreen"
+          component={ProfileStatusScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="FriendProfileDetailScreen"
+          component={FriendProfileDetailScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProfileImageUploader from '../components/ProfileImageUploader';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getUserProfile} from '../utils/api';
 
 function MyProfileScreen() {
   const navigation = useNavigation();
@@ -22,33 +23,20 @@ function MyProfileScreen() {
   const [profileImage, setProfileImage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState('');
 
-  const getUserProfile = async () => {
-    const token = await AsyncStorage.getItem('token');
+  const myProfile = async () => {
     try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/getsingleuser`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setUsername(data.getUser.username);
-        setPhone(data.getUser.phone);
-        setEmail(data.getUser.email);
-        setProfileImage(data.getUser.profileImage);
-        setBackgroundImage(data.getUser.backgroundImage);
-      }
+      const user = await getUserProfile();
+      setUsername(user.username);
+      setPhone(user.phone);
+      setEmail(user.email);
+      setProfileImage(user.profileImage);
+      setBackgroundImage(user.backgroundImage);
     } catch (error) {
       console.log(error.message);
     }
   };
   useEffect(() => {
-    getUserProfile();
+    myProfile();
   }, []);
 
   const handleUpdateProfile = async () => {
@@ -111,9 +99,9 @@ function MyProfileScreen() {
       );
 
       if (response.ok) {
+        await AsyncStorage.removeItem('isLoggedIn');
         await AsyncStorage.removeItem('token');
         navigation.replace('Login');
-        return;
       } else {
         // Handle non-successful response (e.g., display an error message)
         console.error('Failed to logout:', response.statusText);
