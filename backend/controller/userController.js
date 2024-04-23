@@ -142,7 +142,7 @@ const getRandomUsers = async (req, res) => {
     if (randomUserDocument) {
       currentUserDocument.connected = true;
       currentUserDocument.save();
-      // If a random user is found, pair them with the current user
+
       return res.status(201).json({
         message: "Successfully paired",
         users: [currentUserDocument, randomUserDocument],
@@ -156,7 +156,6 @@ const getRandomUsers = async (req, res) => {
     return res.status(500).json({ message: "Error: " + error.message });
   }
 };
-
 const disconnectUsers = async (req, res) => {
   try {
     const currentUser = req.user;
@@ -178,6 +177,7 @@ const disconnectUsers = async (req, res) => {
     return res.status(500).json({ message: "Error: " + error.message });
   }
 };
+
 const followUser = async (req, res) => {
   const { userIdToFollow } = req.params;
   const currentUserId = req.userId;

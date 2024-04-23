@@ -17,6 +17,11 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import CallDetails from '../screens/CallDetails';
 import ProfileStatusScreen from '../screens/ProfileStatusScreen';
 import FriendProfileDetailScreen from '../screens/FriendProfileDetailScreen';
+import {
+  ZegoCallInvitationDialog,
+  ZegoUIKitPrebuiltCallWaitingScreen,
+  ZegoUIKitPrebuiltCallInCallScreen,
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -74,6 +79,7 @@ const StackNavigator = () => {
   }
   return (
     <NavigationContainer>
+      <ZegoCallInvitationDialog />
       <Stack.Navigator>
         <Stack.Screen
           name="Login"
@@ -109,6 +115,18 @@ const StackNavigator = () => {
           name="FriendProfileDetailScreen"
           component={FriendProfileDetailScreen}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          // DO NOT change the name
+          name="ZegoUIKitPrebuiltCallWaitingScreen"
+          component={ZegoUIKitPrebuiltCallWaitingScreen}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          // DO NOT change the name
+          name="ZegoUIKitPrebuiltCallInCallScreen"
+          component={ZegoUIKitPrebuiltCallInCallScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

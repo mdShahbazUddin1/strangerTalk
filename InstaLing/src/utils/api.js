@@ -17,6 +17,7 @@ export const saveCallHistory = async (receiverUserId, call_duration) => {
 
     if (response.ok) {
       const data = await response.json();
+      console.log('history saved');
       getCallHistory();
       return data; // Return data if request is successful
     } else {
@@ -93,7 +94,7 @@ export const getUserProfile = async () => {
     if (response.ok) {
       const data = await response.json();
 
-      return data.getUser; // Return the user data
+      return data.getUser;
     } else {
       throw new Error('Failed to fetch user profile');
     }
