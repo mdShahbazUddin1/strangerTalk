@@ -1,10 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {Platform, Text, SafeAreaView} from 'react-native';
+import {Platform, Text, SafeAreaView, AppState} from 'react-native';
 import WavyCallIndicator from '../components/WavyCallIndicator';
 import CallScreen from '../components/CallScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {setAppBackground} from '../redux/actions';
+import {useDispatch, useSelector} from 'react-redux';
+import {disconnectCall} from '../utils/api';
 
 function FindCallScreen() {
   const [showCallScreen, setShowCallScreen] = useState(false);
@@ -12,7 +15,11 @@ function FindCallScreen() {
   const [videoPermission, setVideoPermission] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pairedData, setPairedData] = useState([]);
+  const [isAppActive, setIsAppActive] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
@@ -58,6 +65,30 @@ function FindCallScreen() {
     }
   };
 
+  useEffect(() => {
+    AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      AppState.removeEventListener('change', handleAppStateChange);
+    };
+  }, []);
+
+  const handleAppStateChange = async nextAppState => {
+    if (nextAppState === 'background' || nextAppState === 'inactive') {
+      disconnectCall();
+      dispatch(setAppBackground(true));
+      setIsAppActive(false); // Update app state
+      setIsMinimized(true); // Set minimized state
+    } else if (nextAppState === 'active') {
+      disconnectCall();
+      dispatch(setAppBackground(false));
+      if (isMinimized) {
+        setIsMinimized(false); // Reset minimized state
+        navigation.replace('Main'); // Navigate to main screen only if the app was minimized
+      }
+    }
+  };
+
   const handleEndCall = () => {
     setShowCallScreen(false);
   };
@@ -71,8 +102,10 @@ function FindCallScreen() {
     };
 
     checkPermissions();
-    getUser();
-  }, []);
+    if (isAppActive && !isMinimized) {
+      getUser(); // Call getUser only if the app is active and not minimized
+    }
+  }, [isAppActive, isMinimized]);
 
   const getUser = async () => {
     try {
