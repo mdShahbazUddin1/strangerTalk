@@ -156,6 +156,7 @@ const getRandomUsers = async (req, res) => {
     return res.status(500).json({ message: "Error: " + error.message });
   }
 };
+
 const disconnectUsers = async (req, res) => {
   try {
     const currentUser = req.user;
@@ -174,6 +175,39 @@ const disconnectUsers = async (req, res) => {
     return res.status(200).json({ message: "User disconnected successfully" });
   } catch (error) {
     // Handle errors
+    return res.status(500).json({ message: "Error: " + error.message });
+  }
+};
+
+const checkRandomUserConnection = async (req, res) => {
+  const { randomId } = req.params;
+  try {
+    const currentUserId = req.userId;
+
+    // Find the current user
+    const currentUserDocument = await UserModel.findById(currentUserId);
+
+    if (!currentUserDocument) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Find the random user
+
+    const randomUserDocument = await UserModel.findById(randomId);
+
+    if (!randomUserDocument) {
+      return res.status(404).json({ message: "Random user not found" });
+    }
+
+    // Check if the random user is not searching and not connected
+    if (!randomUserDocument.searching && !randomUserDocument.connected) {
+      return res.status(201).json({ message: "Random user disconnected" });
+    }
+
+    // If random user is connected or searching, return connected message
+    return res.status(200).json({ message: "Random user connected" });
+  } catch (error) {
+    // Handle errors
+    console.error("Error checking random user connection:", error);
     return res.status(500).json({ message: "Error: " + error.message });
   }
 };
@@ -386,5 +420,6 @@ module.exports = {
   getMutualFriends,
   checkFollowStatus,
   disconnectUsers,
+  checkRandomUserConnection,
   logout,
 };

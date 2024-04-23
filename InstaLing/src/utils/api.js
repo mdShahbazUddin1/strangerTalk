@@ -4,7 +4,8 @@ const BASE_URL = 'https://stranger-backend.onrender.com'; // Your backend server
 
 export const saveCallHistory = async (receiverUserId, call_duration) => {
   const token = await AsyncStorage.getItem('token');
-
+  console.log(receiverUserId, 'receiver_user_id');
+  console.log(call_duration, 'call_duration');
   try {
     const response = await fetch(`${BASE_URL}/call/history/${receiverUserId}`, {
       method: 'POST',

@@ -1,7 +1,12 @@
-import {HANG_UP_CALL} from './actions';
+import {
+  HANG_UP_CALL,
+  SET_APP_BACKGROUND,
+  RANDOM_USER_DISCONNECTED,
+} from './actions';
 
 const initialState = {
   callActive: true,
+  isBackground: false,
 };
 
 const callReducer = (state = initialState, action) => {
@@ -9,12 +14,21 @@ const callReducer = (state = initialState, action) => {
     case HANG_UP_CALL:
       return {
         ...state,
-        callActive: false, // Set callActive to false when call is ended
+        callActive: false,
       };
     case 'SET_CALL_ACTIVE':
       return {
         ...state,
-        callActive: action.payload, // Set callActive based on the payload
+        callActive: action.payload,
+      };
+    case SET_APP_BACKGROUND:
+      return {
+        ...state,
+        isBackground: action.payload,
+      };
+    case RANDOM_USER_DISCONNECTED:
+      return {
+        ...state,
       };
     default:
       return state;

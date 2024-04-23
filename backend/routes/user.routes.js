@@ -14,6 +14,7 @@ const {
   followUser,
   getMutualFriends,
   checkFollowStatus,
+  checkRandomUserConnection,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -47,5 +48,6 @@ userRoute.post("/follow/:userIdToFollow", auth, followUser);
 
 userRoute.get("/friendlist", auth, getMutualFriends);
 userRoute.get("/checkfollow/:userId", auth, checkFollowStatus);
+userRoute.get("/checkstatus/:randomId", auth, checkRandomUserConnection);
 
 module.exports = userRoute;

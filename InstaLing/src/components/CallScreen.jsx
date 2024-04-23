@@ -4,12 +4,16 @@ import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
-
 import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
 import {AppState, StyleSheet, View, Image} from 'react-native';
 import {useNavigation, useIsFocused} from '@react-navigation/native';
-import {hangUpCall} from '../redux/actions';
+import {
+  hangUpCall,
+  randomUserDisconnected,
+  setAppBackground,
+} from '../redux/actions'; // Import setAppBackground action creator
 import {disconnectCall, saveCallHistory} from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CallScreen({pairedData}) {
   const navigation = useNavigation();
@@ -40,16 +44,28 @@ export default function CallScreen({pairedData}) {
     };
   }, []);
 
+  useEffect(() => {
+    const randomUserCheckTimer = setInterval(() => {
+      checkRandomUserConnection();
+      console.log('checking-----------------');
+    }, 2000);
+
+    return () => clearInterval(randomUserCheckTimer);
+  }, []);
+
   const handleAppStateChange = async nextAppState => {
     if (nextAppState === 'background' || nextAppState === 'inactive') {
+      // Dispatch action to set app background status
       disconnectCall();
-      const formattedDuration = formatTime(callDuration);
-      const randomUser = pairedData[1];
+      dispatch(setAppBackground(true));
 
-      if (randomUser) {
+      // Save call duration
+      const formattedDuration = formatTime(callDuration);
+      const currentRandomUser = pairedData[1];
+      if (currentRandomUser) {
         try {
           const response = await saveCallHistory(
-            randomUser._id,
+            currentRandomUser._id,
             formattedDuration,
           );
           console.log('Call history saved:', response);
@@ -57,7 +73,20 @@ export default function CallScreen({pairedData}) {
           console.error('Error saving call history:', error);
         }
       }
-      AppState.removeEventListener('change', handleAppStateChange);
+    } else if (nextAppState === 'active') {
+      // Dispatch action to set app background status
+      disconnectCall();
+      dispatch(setAppBackground(false));
+
+      const currentRandomUser = pairedData[1];
+      if (currentRandomUser) {
+        // Navigate to feedback screen when returning from background
+        navigation.replace('Feedback', {
+          userId: currentRandomUser._id,
+          username: currentRandomUser.username,
+          profileImage: currentRandomUser.profileImage,
+        });
+      }
     }
   };
 
@@ -105,6 +134,48 @@ export default function CallScreen({pairedData}) {
       dispatch({type: 'SET_CALL_ACTIVE', payload: true});
     }
   }, [dispatch, callActive, isFocused]);
+
+  const checkRandomUserConnection = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const randomUser = pairedData[1];
+    console.log(randomUser, 'random id ---------------');
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/checkstatus/${randomUser._id}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: token,
+          },
+        },
+      );
+      const data = await response.json();
+      if (
+        response.status === 201 &&
+        data.message === 'Random user disconnected'
+      ) {
+        disconnectCall();
+        dispatch(randomUserDisconnected());
+        const formattedDuration = formatTime(callDuration);
+        try {
+          const response = await saveCallHistory(
+            randomUser._id,
+            formattedDuration,
+          );
+          console.log(response);
+        } catch (error) {
+          console.error(error);
+        }
+        navigation.replace('Feedback', {
+          userId: randomUser._id,
+          username: randomUser.username,
+          profileImage: randomUser.profileImage,
+        });
+      }
+    } catch (error) {
+      console.error('Error checking random user connection:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
