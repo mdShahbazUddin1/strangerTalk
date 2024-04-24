@@ -54,7 +54,7 @@ const LoginScreen = () => {
         await AsyncStorage.setItem('isLoggedIn', 'true');
         await AsyncStorage.setItem('token', responseData.token);
         Alert.alert('Login successful', 'You have successfully logged in.', [
-          {text: 'OK', onPress: () => navigation.navigate('Main')},
+          {text: 'OK', onPress: () => navigation.replace('WelComeBack')},
         ]);
       }
     } catch (error) {

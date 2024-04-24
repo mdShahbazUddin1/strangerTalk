@@ -22,6 +22,8 @@ import {
   ZegoUIKitPrebuiltCallWaitingScreen,
   ZegoUIKitPrebuiltCallInCallScreen,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import GameWebView from '../components/GameWebView';
+import WelcomeBack from '../components/WelComeBack';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -94,6 +96,16 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Main"
           component={BottomTabs}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="GameWebView"
+          component={GameWebView}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="WelComeBack"
+          component={WelcomeBack}
           options={{headerShown: false}}
         />
         <Stack.Screen

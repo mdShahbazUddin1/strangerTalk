@@ -9,6 +9,7 @@ import {useNavigation} from '@react-navigation/native';
 function UserStatus() {
   const navigation = useNavigation();
   const [user, setUser] = useState({});
+
   const myProfile = async () => {
     const userProfile = await getUserProfile();
     setUser(userProfile);
