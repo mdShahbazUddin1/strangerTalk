@@ -24,6 +24,8 @@ import {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import GameWebView from '../components/GameWebView';
 import WelcomeBack from '../components/WelComeBack';
+import AccountDetails from '../screens/AccountDetails';
+import TermsAndConditions from '../screens/TermsAndCondition';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -69,7 +71,7 @@ const StackNavigator = () => {
         />
         <Tab.Screen
           name="Profile"
-          component={MyProfileScreen}
+          component={AccountDetails}
           options={{
             tabBarIcon: ({color}) => (
               <EvilIcons name="user" size={34} color={color} />
@@ -106,6 +108,16 @@ const StackNavigator = () => {
         <Stack.Screen
           name="WelComeBack"
           component={WelcomeBack}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="MyProfile"
+          component={MyProfileScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="TermsAndCondtions"
+          component={TermsAndConditions}
           options={{headerShown: false}}
         />
         <Stack.Screen
