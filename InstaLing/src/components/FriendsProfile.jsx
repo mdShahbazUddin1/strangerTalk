@@ -3,12 +3,7 @@ import {Text, View, TouchableOpacity, Image} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
-import * as ZIM from 'zego-zim-react-native';
-import * as ZPNs from 'zego-zpns-react-native';
-import {
-  ZegoUIKitPrebuiltCallService,
-  ZegoSendCallInvitationButton,
-} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
 import {getUserProfile} from '../utils/api';
 
 const FriendsProfile = () => {
@@ -47,31 +42,9 @@ const FriendsProfile = () => {
     }
   };
 
-  const initService = async () => {
-    return ZegoUIKitPrebuiltCallService.init(
-      256539217,
-      '920385abe4c02ddc0f93a1458839ed61845768d4ed4fcd776ca5ea5efff10925',
-      user._id,
-      user.username,
-      [ZIM, ZPNs],
-      {
-        ringtoneConfig: {
-          incomingCallFileName: 'zego_incoming.mp3',
-          outgoingCallFileName: 'zego_outgoing.mp3',
-        },
-        notifyWhenAppRunningInBackgroundOrQuit: true,
-        androidNotificationConfig: {
-          channelID: 'zego_video_call',
-          channelName: 'zego_video_call',
-        },
-      },
-    );
-  };
-
   useEffect(() => {
     getFriendsList();
-    initService();
-  }, [user]);
+  }, []);
 
   const handleFriendScreen = async (
     userId,
@@ -130,7 +103,7 @@ const FriendsProfile = () => {
                 </TouchableOpacity>
 
                 <View style={{position: 'absolute', bottom: -2, left: 40}}>
-                  <ZegoSendCallInvitationButton
+                  {/* <ZegoSendCallInvitationButton
                     invitees={friends.map(friend => ({
                       userID: friend._id,
                       userName: friend.username,
@@ -139,7 +112,7 @@ const FriendsProfile = () => {
                     resourceID={'zego_data'}
                     width={25}
                     height={25}
-                  />
+                  /> */}
                 </View>
               </View>
 

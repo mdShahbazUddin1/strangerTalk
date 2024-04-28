@@ -5,7 +5,7 @@ import CallScreen from '../components/CallScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {setAppBackground} from '../redux/actions';
+import {setAppBackground} from '../redux/types';
 import {useDispatch, useSelector} from 'react-redux';
 import {disconnectCall} from '../utils/api';
 
@@ -17,7 +17,7 @@ function FindCallScreen() {
   const [pairedData, setPairedData] = useState([]);
   const [isAppActive, setIsAppActive] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
-
+  const [roomId, setRoomId] = useState(null);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -65,30 +65,6 @@ function FindCallScreen() {
     }
   };
 
-  useEffect(() => {
-    AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      AppState.removeEventListener('change', handleAppStateChange);
-    };
-  }, []);
-
-  const handleAppStateChange = async nextAppState => {
-    if (nextAppState === 'background' || nextAppState === 'inactive') {
-      disconnectCall();
-      dispatch(setAppBackground(true));
-      setIsAppActive(false); // Update app state
-      setIsMinimized(true); // Set minimized state
-    } else if (nextAppState === 'active') {
-      disconnectCall();
-      dispatch(setAppBackground(false));
-      if (isMinimized) {
-        setIsMinimized(false); // Reset minimized state
-        navigation.replace('Main'); // Navigate to main screen only if the app was minimized
-      }
-    }
-  };
-
   const handleEndCall = () => {
     setShowCallScreen(false);
   };
@@ -102,10 +78,9 @@ function FindCallScreen() {
     };
 
     checkPermissions();
-    if (isAppActive && !isMinimized) {
-      getUser(); // Call getUser only if the app is active and not minimized
-    }
-  }, [isAppActive, isMinimized]);
+
+    getUser();
+  }, []);
 
   const getUser = async () => {
     try {
@@ -129,6 +104,8 @@ function FindCallScreen() {
       if (data.message === 'Successfully paired') {
         setPairedData(data.users);
         // console.log(data.users);
+        // setRoomId(data.roomId);
+
         setIsLoading(false);
         setShowCallScreen(true);
         // console.log('paired', pairedData);
@@ -141,7 +118,7 @@ function FindCallScreen() {
       setIsLoading(false); // Stop loading indicator on error
     }
   };
-
+  console.log('RoomId', roomId);
   if (audioPermission !== true || videoPermission !== true) {
     return (
       <SafeAreaView
@@ -171,7 +148,7 @@ function FindCallScreen() {
       {isLoading ? (
         <WavyCallIndicator />
       ) : showCallScreen ? (
-        <CallScreen pairedData={pairedData} onEndCall={handleEndCall} />
+        <CallScreen pairedData={pairedData} />
       ) : null}
     </SafeAreaView>
   );

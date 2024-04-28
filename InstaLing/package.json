@@ -19,9 +19,6 @@
     "@react-navigation/material-bottom-tabs": "^6.2.28",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
-    "@zegocloud/react-native-callkeep": "^4.3.9",
-    "@zegocloud/zego-uikit-prebuilt-call-rn": "^4.6.0",
-    "@zegocloud/zego-uikit-rn": "^2.8.0",
     "formik": "^2.4.5",
     "react": "18.2.0",
     "react-delegate-component": "^1.0.0",
@@ -42,14 +39,13 @@
     "react-native-sound": "^0.11.2",
     "react-native-vector-icons": "^10.0.3",
     "react-native-video": "^5.2.1",
+    "react-native-webrtc": "^118.0.7",
     "react-native-webview": "^13.8.6",
     "react-redux": "^9.1.1",
     "redux": "^5.0.1",
+    "redux-thunk": "^3.1.0",
     "socket.io-client": "^4.7.5",
-    "yup": "^1.4.0",
-    "zego-express-engine-reactnative": "^3.2.0",
-    "zego-zim-react-native": "^2.12.1",
-    "zego-zpns-react-native": "^2.5.0-alpha"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

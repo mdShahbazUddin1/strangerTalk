@@ -9,6 +9,7 @@
 
 # Add any project specific keep options here:
 
--keep class **.zego.**  { *; }
--keep class **.**.zego_zpns.** { *; }
+-keep class org.webrtc.** { *; }
+
+
 Fatal Exception: java.lang.UnsatisfiedLinkError: No implementation found for void org.webrtc.PeerConnectionFactory.nativeInitializeAndroidGlobals() (tried Java_org_webrtc_PeerConnectionFactory_nativeInitializeAndroidGlobals and Java_org_webrtc_PeerConnectionFactory_nativeInitializeAndroidGlobals__)

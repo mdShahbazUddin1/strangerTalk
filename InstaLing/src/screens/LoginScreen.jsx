@@ -51,8 +51,15 @@ const LoginScreen = () => {
 
       if (response.status === 200) {
         const responseData = await response.json();
+        console.log(responseData.user.userId);
         await AsyncStorage.setItem('isLoggedIn', 'true');
         await AsyncStorage.setItem('token', responseData.token);
+        await AsyncStorage.setItem('userId', responseData.user.userId);
+        await AsyncStorage.setItem('username', responseData.user.username);
+        await AsyncStorage.setItem(
+          'profileImage',
+          responseData.user.profileImage,
+        );
         Alert.alert('Login successful', 'You have successfully logged in.', [
           {text: 'OK', onPress: () => navigation.replace('WelComeBack')},
         ]);

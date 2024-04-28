@@ -1,233 +1,177 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  ZegoUIKitPrebuiltCall,
-  ONE_ON_ONE_VIDEO_CALL_CONFIG,
-} from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {ZegoLayoutMode, ZegoViewPosition} from '@zegocloud/zego-uikit-rn';
-import {AppState, StyleSheet, View, Image} from 'react-native';
-import {useNavigation, useIsFocused} from '@react-navigation/native';
-import {
-  hangUpCall,
-  randomUserDisconnected,
-  setAppBackground,
-} from '../redux/actions'; // Import setAppBackground action creator
-import {disconnectCall, saveCallHistory} from '../utils/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {View, Button, Text, Image} from 'react-native';
+import io from 'socket.io-client';
+import {RTCPeerConnection, RTCView, mediaDevices} from 'react-native-webrtc';
 
-export default function CallScreen({pairedData}) {
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const callActive = useSelector(state => state.callActive);
-  const isFocused = useIsFocused();
-  const [callDuration, setCallDuration] = useState(0);
-  const [randomUser, setRandomUser] = useState(null);
-  const [reversedData, setReversedData] = useState([]);
+const socket = io('http://192.168.1.9:8080');
+
+const CallScreen = ({pairedData}) => {
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
+  const [roomName, setRoomName] = useState('');
+  const [localUser, setLocalUser] = useState(null);
+  const [remoteUser, setRemoteUser] = useState(null);
 
   useEffect(() => {
-    setReversedData([...pairedData].reverse());
-  }, [pairedData]);
+    const initializeStreams = async () => {
+      const stream = await mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      setLocalStream(stream);
+    };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCallDuration(prevDuration => prevDuration + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    AppState.addEventListener('change', handleAppStateChange);
+    initializeStreams();
 
     return () => {
-      AppState.removeEventListener('change', handleAppStateChange);
+      if (localStream) {
+        localStream.release();
+      }
     };
   }, []);
 
   useEffect(() => {
-    const randomUserCheckTimer = setInterval(() => {
-      checkRandomUserConnection();
-      console.log('checking-----------------');
-    }, 2000);
+    if (pairedData.length > 0) {
+      setLocalUser(pairedData[0]);
+    }
+    if (pairedData.length > 1) {
+      setRemoteUser(pairedData[1]);
+    }
+  }, [pairedData]);
 
-    return () => clearInterval(randomUserCheckTimer);
+  useEffect(() => {
+    const randomRoomName = 'room_123';
+    setRoomName(randomRoomName);
+    socket.emit('join', randomRoomName);
+    console.log('Joining room:', randomRoomName);
   }, []);
 
-  const handleAppStateChange = async nextAppState => {
-    if (nextAppState === 'background' || nextAppState === 'inactive') {
-      // Dispatch action to set app background status
-      disconnectCall();
-      dispatch(setAppBackground(true));
-
-      // Save call duration
-      const formattedDuration = formatTime(callDuration);
-      const currentRandomUser = pairedData[1];
-      if (currentRandomUser) {
-        try {
-          const response = await saveCallHistory(
-            currentRandomUser._id,
-            formattedDuration,
-          );
-          console.log('Call history saved:', response);
-        } catch (error) {
-          console.error('Error saving call history:', error);
-        }
-      }
-    } else if (nextAppState === 'active') {
-      // Dispatch action to set app background status
-      disconnectCall();
-      dispatch(setAppBackground(false));
-
-      const currentRandomUser = pairedData[1];
-      if (currentRandomUser) {
-        // Navigate to feedback screen when returning from background
-        navigation.replace('Feedback', {
-          userId: currentRandomUser._id,
-          username: currentRandomUser.username,
-          profileImage: currentRandomUser.profileImage,
-        });
-      }
+  useEffect(() => {
+    if (roomName && localStream) {
+      createPeerConnection();
     }
-  };
+  }, [roomName, localStream]);
 
   useEffect(() => {
-    if (!callActive && isFocused && randomUser) {
-      navigation.replace('Feedback', {
-        userId: randomUser._id,
-        username: randomUser.username,
-        profileImage: randomUser.profileImage,
-      });
-    }
-  }, [callActive, isFocused, navigation, randomUser]);
+    const handleOffer = async offer => {
+      console.log('Received offer:', offer);
+      await peerConnection.setRemoteDescription(offer);
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      socket.emit('answer', answer, roomName);
+      console.log('Sending answer:', answer);
+    };
 
-  const formatTime = time => {
-    const hours = Math.floor(time / 3600);
-    const minutes = Math.floor((time % 3600) / 60);
-    const seconds = time % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+    socket.on('offer', handleOffer);
 
-  const handleHangUp = async () => {
-    disconnectCall();
-    const formattedDuration = formatTime(callDuration);
-    const randomUser = reversedData[0];
+    return () => {
+      socket.off('offer', handleOffer);
+    };
+  }, [peerConnection, roomName]);
 
-    if (randomUser) {
-      setRandomUser(randomUser);
+  useEffect(() => {
+    const handleAnswer = async answer => {
+      console.log('Received answer:', answer);
+      await peerConnection.setRemoteDescription(answer);
+    };
+
+    socket.on('answer', handleAnswer);
+
+    return () => {
+      socket.off('answer', handleAnswer);
+    };
+  }, [peerConnection]);
+
+  useEffect(() => {
+    const handleCandidate = async candidate => {
       try {
-        const response = await saveCallHistory(
-          randomUser._id,
-          formattedDuration,
-        );
-        console.log(response);
-      } catch (error) {
-        console.error(error);
+        await peerConnection.addIceCandidate(candidate);
+      } catch (err) {
+        console.error('Error adding ice candidate:', err);
       }
+    };
+
+    socket.on('candidate', handleCandidate);
+
+    return () => {
+      socket.off('candidate', handleCandidate);
+    };
+  }, [peerConnection]);
+
+  const createPeerConnection = async () => {
+    const configuration = {
+      iceServers: [{urls: 'stun:stun.l.google.com:19302'}],
+    };
+    const pc = new RTCPeerConnection(configuration);
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
     }
-    dispatch(hangUpCall());
+
+    pc.ontrack = event => {
+      console.log('Remote stream received:', event.streams[0]);
+      setRemoteStream(event.streams[0]);
+    };
+
+    pc.onicecandidate = event => {
+      if (event.candidate) {
+        socket.emit('candidate', event.candidate, roomName);
+        console.log('Sending candidate:', event.candidate);
+      }
+    };
+
+    setPeerConnection(pc);
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit('offer', offer, roomName);
+    console.log('Sending offer:', offer);
   };
 
-  useEffect(() => {
-    if (!callActive && isFocused) {
-      dispatch({type: 'SET_CALL_ACTIVE', payload: true});
-    }
-  }, [dispatch, callActive, isFocused]);
-
-  const checkRandomUserConnection = async () => {
-    const token = await AsyncStorage.getItem('token');
-    const randomUser = pairedData[1];
-    console.log(randomUser, 'random id ---------------');
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/checkstatus/${randomUser._id}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: token,
-          },
-        },
-      );
-      const data = await response.json();
-      if (
-        response.status === 201 &&
-        data.message === 'Random user disconnected'
-      ) {
-        disconnectCall();
-        dispatch(randomUserDisconnected());
-        const formattedDuration = formatTime(callDuration);
-        try {
-          const response = await saveCallHistory(
-            randomUser._id,
-            formattedDuration,
-          );
-          console.log(response);
-        } catch (error) {
-          console.error(error);
-        }
-        navigation.replace('Feedback', {
-          userId: randomUser._id,
-          username: randomUser.username,
-          profileImage: randomUser.profileImage,
-        });
-      }
-    } catch (error) {
-      console.error('Error checking random user connection:', error);
-    }
+  const handleHangUp = () => {
+    // Implement logic to hang up the call
   };
 
   return (
-    <View style={styles.container}>
-      {reversedData.map((user, index) => (
-        <ZegoUIKitPrebuiltCall
-          key={user._id}
-          style={styles.mirroredVideo}
-          appID={256539217}
-          appSign="920385abe4c02ddc0f93a1458839ed61845768d4ed4fcd776ca5ea5efff10925"
-          userID={user._id}
-          userName={user.username}
-          callID="group123"
-          config={{
-            ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
-            onHangUp: handleHangUp,
-            turnOnCameraWhenJoining: false,
-            turnOnMicrophoneWhenJoining: false,
-            useSpeakerWhenJoining: false,
-            avatarBuilder: () => (
-              <View style={{width: '100%', height: '100%'}}>
-                {user.profileImage && (
-                  <Image
-                    style={{width: '100%', height: '100%'}}
-                    resizeMode="cover"
-                    source={{uri: user.profileImage}}
-                  />
-                )}
-              </View>
-            ),
-            layout: {
-              mode: ZegoLayoutMode.pictureInPicture,
-              config: {
-                switchLargeOrSmallViewByClick: true,
-                smallViewBorderRadius: 10,
-                smallViewPosition: ZegoViewPosition.topRight,
-                smallViewSize: {width: 85, height: 151},
-              },
-            },
-          }}
-        />
-      ))}
+    <View>
+      <View>
+        {localUser && (
+          <View>
+            <Text>{localUser.username}</Text>
+            <Image
+              source={{uri: localUser.profileImage}}
+              style={{width: 50, height: 50}}
+            />
+          </View>
+        )}
+        {localStream && (
+          <RTCView
+            streamURL={localStream.toURL()}
+            style={{width: 200, height: 150}}
+          />
+        )}
+      </View>
+      <View>
+        {remoteUser && (
+          <View>
+            <Text>{remoteUser.username}</Text>
+            <Image
+              source={{uri: remoteUser.profileImage}}
+              style={{width: 50, height: 50}}
+            />
+          </View>
+        )}
+        {remoteStream && (
+          <RTCView
+            streamURL={remoteStream.toURL()}
+            style={{width: 200, height: 150}}
+          />
+        )}
+      </View>
+      <Button title="Hang Up" onPress={handleHangUp} />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mirroredVideo: {
-    transform: [{scaleX: -1}],
-  },
-});
+export default CallScreen;

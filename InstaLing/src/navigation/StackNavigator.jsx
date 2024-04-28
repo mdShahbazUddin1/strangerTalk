@@ -17,15 +17,13 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import CallDetails from '../screens/CallDetails';
 import ProfileStatusScreen from '../screens/ProfileStatusScreen';
 import FriendProfileDetailScreen from '../screens/FriendProfileDetailScreen';
-import {
-  ZegoCallInvitationDialog,
-  ZegoUIKitPrebuiltCallWaitingScreen,
-  ZegoUIKitPrebuiltCallInCallScreen,
-} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
 import GameWebView from '../components/GameWebView';
 import WelcomeBack from '../components/WelComeBack';
 import AccountDetails from '../screens/AccountDetails';
 import TermsAndConditions from '../screens/TermsAndCondition';
+import Subscription from '../screens/Subscription';
+import CallScreen from '../components/CallScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -83,7 +81,6 @@ const StackNavigator = () => {
   }
   return (
     <NavigationContainer>
-      <ZegoCallInvitationDialog />
       <Stack.Navigator>
         <Stack.Screen
           name="Login"
@@ -116,6 +113,11 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="Subscription"
+          component={Subscription}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="TermsAndCondtions"
           component={TermsAndConditions}
           options={{headerShown: false}}
@@ -141,16 +143,9 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="CallScreen"
+          component={CallScreen}
           options={{headerShown: false}}
-          // DO NOT change the name
-          name="ZegoUIKitPrebuiltCallWaitingScreen"
-          component={ZegoUIKitPrebuiltCallWaitingScreen}
-        />
-        <Stack.Screen
-          options={{headerShown: false}}
-          // DO NOT change the name
-          name="ZegoUIKitPrebuiltCallInCallScreen"
-          component={ZegoUIKitPrebuiltCallInCallScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

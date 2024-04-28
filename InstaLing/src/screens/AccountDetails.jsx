@@ -102,7 +102,8 @@ const AccountDetails = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                }}>
+                }}
+                onPress={() => navigation.navigate('Subscription')}>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <EvilIcons name="star" size={25} color={'gray'} />
                   <Text

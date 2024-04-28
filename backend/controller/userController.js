@@ -80,7 +80,11 @@ const login = async (req, res) => {
       return res.status(403).send({ msg: "Email or password is incorrect" });
 
     const token = await jwt.sign(
-      { userId: isUserPresent._id },
+      {
+        userId: isUserPresent._id,
+        username: isUserPresent.username,
+        profileImage: isUserPresent.profileImage,
+      },
       process.env.SECRET_ACCESS_KEY
     );
 
