@@ -61,7 +61,7 @@ function MyProfileScreen() {
     });
     try {
       const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/editprofile`,
+        `http://192.168.1.13:8080/auth/editprofile`,
         {
           method: 'PUT',
           headers: {

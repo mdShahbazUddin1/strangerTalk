@@ -1,9 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import {View, Button, Text, Image} from 'react-native';
+import {
+  View,
+  Button,
+  Text,
+  Image,
+  StyleSheet,
+  useWindowDimensions,
+  TouchableOpacity,
+} from 'react-native';
 import io from 'socket.io-client';
 import {RTCPeerConnection, RTCView, mediaDevices} from 'react-native-webrtc';
+import {useNavigation} from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Octicons from 'react-native-vector-icons/Octicons';
+import Feather from 'react-native-vector-icons/Feather';
 
-const socket = io('http://192.168.1.9:8080');
+const socket = io('http://192.168.1.13:8080');
 
 const CallScreen = ({pairedData}) => {
   const [localStream, setLocalStream] = useState(null);
@@ -12,6 +26,24 @@ const CallScreen = ({pairedData}) => {
   const [roomName, setRoomName] = useState('');
   const [localUser, setLocalUser] = useState(null);
   const [remoteUser, setRemoteUser] = useState(null);
+  const {width, height} = useWindowDimensions();
+
+  const navigation = useNavigation();
+
+  const [selectedButtons, setSelectedButtons] = useState({
+    microphone: false,
+    camera: false,
+    hangup: false,
+    video: false,
+    unmute: false,
+  });
+
+  const toggleButton = buttonName => {
+    setSelectedButtons(prevState => ({
+      ...prevState,
+      [buttonName]: !prevState[buttonName],
+    }));
+  };
 
   useEffect(() => {
     const initializeStreams = async () => {
@@ -130,48 +162,193 @@ const CallScreen = ({pairedData}) => {
   };
 
   const handleHangUp = () => {
-    // Implement logic to hang up the call
+    navigation.replace('Main');
   };
-
   return (
-    <View>
-      <View>
-        {localUser && (
-          <View>
-            <Text>{localUser.username}</Text>
-            <Image
-              source={{uri: localUser.profileImage}}
-              style={{width: 50, height: 50}}
-            />
-          </View>
-        )}
-        {localStream && (
-          <RTCView
-            streamURL={localStream.toURL()}
-            style={{width: 200, height: 150}}
-          />
-        )}
-      </View>
-      <View>
-        {remoteUser && (
-          <View>
-            <Text>{remoteUser.username}</Text>
-            <Image
-              source={{uri: remoteUser.profileImage}}
-              style={{width: 50, height: 50}}
-            />
-          </View>
-        )}
-        {remoteStream && (
+    <View
+      style={[
+        styles.container,
+        {backgroundColor: remoteStream ? 'transparent' : '#454545'},
+      ]}>
+      {remoteStream && (
+        <View>
           <RTCView
             streamURL={remoteStream.toURL()}
-            style={{width: 200, height: 150}}
+            style={{width: width, height: height, marginTop: -45}}
+            mirror={true}
           />
-        )}
+          <Text
+            style={{
+              position: 'absolute',
+              bottom: 50,
+              right: 5,
+              color: 'white',
+              backgroundColor: 'gray',
+              paddingHorizontal: 5,
+              borderRadius: 5,
+              fontSize: 12,
+              paddingVertical: 2,
+            }}>
+            {remoteUser?.username}
+          </Text>
+        </View>
+      )}
+      {localStream && (
+        <View
+          style={[
+            styles.myStreamWrapper,
+            {
+              height: height * 0.2,
+              width: width * 0.3,
+              right: remoteStream ? undefined : 250,
+              left: remoteStream ? 250 : undefined,
+            },
+          ]}>
+          <RTCView
+            style={styles.myStream}
+            objectFit="cover"
+            streamURL={localStream.toURL()}
+            mirror={true}
+            zOrder={1}
+          />
+          <Text style={{position: 'absolute', bottom: 5, right: 5}}>
+            {localUser?.username}
+          </Text>
+        </View>
+      )}
+
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '90%',
+          position: 'absolute',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 20,
+          left: remoteStream ? 20 : -160,
+          bottom: 50,
+        }}>
+        <TouchableOpacity
+          onPress={() => toggleButton('video')}
+          style={[
+            styles.button,
+            selectedButtons.video && styles.selectedButton,
+            {backgroundColor: selectedButtons.video ? '#ffffff' : '#454545'},
+          ]}>
+          <Feather
+            name={!selectedButtons.video ? 'video-off' : 'video'}
+            size={22}
+            color={selectedButtons.video ? 'black' : 'white'}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => toggleButton('camera')}
+          style={[
+            styles.button,
+            selectedButtons.camera && styles.selectedButton,
+            {backgroundColor: selectedButtons.camera ? '#ffffff' : '#454545'},
+          ]}>
+          <Ionicons
+            name="camera-reverse-outline"
+            size={24}
+            color={selectedButtons.camera ? 'black' : 'white'}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            padding: 10,
+            backgroundColor: 'red',
+            paddingHorizontal: 11,
+            borderRadius: 50,
+          }}>
+          <MaterialCommunityIcons
+            name="phone-hangup"
+            size={24}
+            color={'white'}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => toggleButton('microphone')}
+          style={[
+            styles.button,
+            selectedButtons.microphone && styles.selectedButton,
+            {
+              paddingHorizontal: 15,
+              paddingVertical: 11,
+              backgroundColor: selectedButtons.microphone
+                ? '#ffffff'
+                : '#454545',
+            },
+          ]}>
+          <FontAwesome
+            name="microphone"
+            size={21}
+            color={selectedButtons.microphone ? 'black' : 'white'}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => toggleButton('unmute')}
+          style={[
+            styles.button,
+            selectedButtons.unmute && styles.selectedButton,
+            {
+              backgroundColor: selectedButtons.unmute ? '#ffffff' : '#454545',
+              paddingHorizontal: 11,
+            },
+          ]}>
+          <Octicons
+            name="unmute"
+            size={22}
+            color={selectedButtons.unmute ? 'black' : 'white'}
+          />
+        </TouchableOpacity>
       </View>
-      <Button title="Hang Up" onPress={handleHangUp} />
     </View>
   );
 };
 
 export default CallScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative',
+    backgroundColor: '#454545',
+  },
+  myStream: {
+    height: '100%', // Fill the container height
+    width: '100%', // Fill the container width
+  },
+  myStreamWrapper: {
+    position: 'absolute',
+    top: 10,
+    backgroundColor: '#333',
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  remoteStreamWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  remoteStream: {
+    // position: 'absolute',
+    // top: -10,
+    // left: 0,
+    width: '100%', // Fill the container width
+    height: '100%', // Fill the container height
+  },
+  button: {
+    padding: 10,
+    backgroundColor: '#454545',
+    borderRadius: 50,
+  },
+  selectedButton: {
+    backgroundColor: '#fffff',
+    borderRadius: 50,
+  },
+});

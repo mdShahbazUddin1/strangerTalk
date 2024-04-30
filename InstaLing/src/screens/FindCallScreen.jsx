@@ -91,14 +91,11 @@ function FindCallScreen() {
         return;
       }
 
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/getrandom`,
-        {
-          headers: {
-            Authorization: token,
-          },
+      const response = await fetch(`http://192.168.1.13:8080/auth/getrandom`, {
+        headers: {
+          Authorization: token,
         },
-      );
+      });
       const data = await response.json();
 
       if (data.message === 'Successfully paired') {

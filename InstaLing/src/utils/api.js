@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://stranger-backend.onrender.com'; // Your backend server URL
+const BASE_URL = 'http://192.168.1.13:8080'; // Your backend server URL
 
 export const saveCallHistory = async (receiverUserId, call_duration) => {
   const token = await AsyncStorage.getItem('token');
@@ -82,16 +82,13 @@ export const disconnectCall = async () => {
 export const getUserProfile = async () => {
   const token = await AsyncStorage.getItem('token');
   try {
-    const response = await fetch(
-      `https://stranger-backend.onrender.com/auth/getsingleuser`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token,
-        },
+    const response = await fetch(`${BASE_URL}/auth/getsingleuser`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
       },
-    );
+    });
     if (response.ok) {
       const data = await response.json();
 
@@ -110,7 +107,7 @@ export const getRandomAllFeedBack = async receiver_user_id => {
 
   try {
     const response = await fetch(
-      `https://stranger-backend.onrender.com/feedback/getfeedbackofrandom/${receiver_user_id}`,
+      `http://192.168.1.13:8080/feedback/getfeedbackofrandom/${receiver_user_id}`,
       {
         method: 'GET',
         headers: {
@@ -135,7 +132,7 @@ export const getGivenFeedBack = async () => {
   const token = await AsyncStorage.getItem('token');
   try {
     const response = await fetch(
-      `https://stranger-backend.onrender.com/feedback/getgivenfeedback`,
+      `http://192.168.1.13:8080/feedback/getgivenfeedback`,
       {
         method: 'GET',
         headers: {

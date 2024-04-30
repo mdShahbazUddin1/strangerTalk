@@ -82,13 +82,19 @@ const login = async (req, res) => {
     const token = await jwt.sign(
       {
         userId: isUserPresent._id,
-        username: isUserPresent.username,
-        profileImage: isUserPresent.profileImage,
       },
       process.env.SECRET_ACCESS_KEY
     );
 
-    res.status(200).send({ msg: "Login Success", token });
+    res.status(200).send({
+      msg: "Login Success",
+      token,
+      user: {
+        userId: isUserPresent._id,
+        username: isUserPresent.username,
+        profileImage: isUserPresent.profileImage,
+      },
+    });
   } catch (error) {
     res.status(503).send({ msg: "Server Error", error: error.message });
   }

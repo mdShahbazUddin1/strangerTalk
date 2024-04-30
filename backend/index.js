@@ -44,6 +44,14 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Handler for mute state event
+  socket.on("muteState", (isMuted) => {
+    console.log("Mute State:", isMuted);
+    // Access roomName from socket object
+    const roomName = Object.keys(socket.rooms)[1]; // Get the second room (the first is always the socket's own room)
+    socket.to(roomName).emit("muteState", isMuted);
+  });
+
   // Handler for ready event
   socket.on("ready", () => {
     console.log("Ready");
@@ -71,6 +79,12 @@ io.on("connection", (socket) => {
     console.log("answer");
     console.log(answer);
     socket.to(roomName).emit("answer", answer, roomName);
+  });
+
+  // Handler for cameraState event
+  socket.on("cameraState", (cameraState, roomName) => {
+    console.log("Camera State:", cameraState);
+    socket.to(roomName).emit("cameraState", cameraState);
   });
 });
 // Start the server
