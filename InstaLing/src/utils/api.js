@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://192.168.1.13:8080'; // Your backend server URL
+const BASE_URL = 'http://192.168.1.7:8080'; // Your backend server URL
 
 export const saveCallHistory = async (receiverUserId, call_duration) => {
   const token = await AsyncStorage.getItem('token');
@@ -107,7 +107,7 @@ export const getRandomAllFeedBack = async receiver_user_id => {
 
   try {
     const response = await fetch(
-      `http://192.168.1.13:8080/feedback/getfeedbackofrandom/${receiver_user_id}`,
+      `${BASE_URL}/feedback/getfeedbackofrandom/${receiver_user_id}`,
       {
         method: 'GET',
         headers: {
@@ -131,15 +131,12 @@ export const getRandomAllFeedBack = async receiver_user_id => {
 export const getGivenFeedBack = async () => {
   const token = await AsyncStorage.getItem('token');
   try {
-    const response = await fetch(
-      `http://192.168.1.13:8080/feedback/getgivenfeedback`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: token,
-        },
+    const response = await fetch(`${BASE_URL}/feedback/getgivenfeedback`, {
+      method: 'GET',
+      headers: {
+        Authorization: token,
       },
-    );
+    });
     if (response.status === 200) {
       const data = await response.json();
 

@@ -13,105 +13,105 @@ import {useNavigation} from '@react-navigation/native';
 
 function ResendCall({resendUser}) {
   const navigation = useNavigation();
-  // return (
-  //   <View style={{marginTop: 15}}>
-  //     <View
-  //       style={{
-  //         flexDirection: 'row',
-  //         alignItems: 'center',
-  //         justifyContent: 'space-between',
-  //         margin: 10,
-  //       }}>
-  //       <View>
-  //         <Text
-  //           style={{
-  //             color: '#171A1FFF',
-  //             fontWeight: '700',
-  //             fontFamily: 'sans-serif',
-  //             fontSize: 16,
-  //           }}>
-  //           Recent Call
-  //         </Text>
-  //       </View>
-  //       <View>
-  //         <TouchableOpacity>
-  //           <Text
-  //             style={{
-  //               color: '#6D31EDFF',
-  //               fontWeight: '400',
-  //               fontSize: 12,
-  //             }}>
-  //             View More
-  //           </Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </View>
-  //     <ScrollView
-  //       horizontal
-  //       showsHorizontalScrollIndicator={false}
-  //       style={{marginTop: 5}}>
-  //       {resendUser?.map((user, index) => (
-  //         <TouchableOpacity
-  //           key={index}
-  //           style={styles.imageContainer}
-  //           onPress={() =>
-  //             navigation.navigate('CallDetails', {
-  //               callId: user.receiver_user_id._id,
-  //               username: user.receiver_user_id.username,
-  //               email: user.receiver_user_id.email,
-  //               receiver_user_id: user.receiver_user_id._id,
-  //               backgroundImage: user.receiver_user_id.backgroundImage,
-  //               profileImage: user.receiver_user_id.profileImage,
-  //               call_duration: user.call_duration,
-  //               call_datetime: user.call_datetime,
-  //               followers: user.receiver_user_id.followers,
-  //             })
-  //           }>
-  //           <Image
-  //             style={styles.image}
-  //             source={{uri: user.receiver_user_id.backgroundImage}}
-  //           />
-  //           <View
-  //             style={{
-  //               width: '100%',
-  //               position: 'absolute',
-  //               flexDirection: 'row',
-  //               alignItems: 'center',
-  //               justifyContent: 'space-between',
-  //               bottom: 0,
-  //               paddingHorizontal: 10,
-  //               paddingVertical: 10,
-  //             }}>
-  //             <View>
-  //               <Text
-  //                 style={{
-  //                   color: 'white',
-  //                   fontSize: 12,
-  //                   fontWeight: '700',
-  //                 }}>
-  //                 {user.receiver_user_id.username}
-  //               </Text>
-  //             </View>
-  //             <View>
-  //               <View>
-  //                 <Image
-  //                   style={{width: 50, height: 50, borderRadius: 50}}
-  //                   source={{uri: user.receiver_user_id.profileImage}}
-  //                 />
-  //               </View>
-  //               <View style={{paddingTop: 5, flexDirection: 'row'}}>
-  //                 <AntDesign name="star" size={12} color="orange" />
-  //                 <AntDesign name="star" size={12} color="orange" />
-  //                 <AntDesign name="star" size={12} color="orange" />
-  //                 <AntDesign name="star" size={12} color="orange" />
-  //               </View>
-  //             </View>
-  //           </View>
-  //         </TouchableOpacity>
-  //       ))}
-  //     </ScrollView>
-  //   </View>
-  // );
+  return (
+    <View style={{marginTop: 15}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          margin: 10,
+        }}>
+        <View>
+          <Text
+            style={{
+              color: '#171A1FFF',
+              fontWeight: '700',
+              fontFamily: 'sans-serif',
+              fontSize: 16,
+            }}>
+            Recent Call
+          </Text>
+        </View>
+        <View>
+          <TouchableOpacity>
+            <Text
+              style={{
+                color: '#6D31EDFF',
+                fontWeight: '400',
+                fontSize: 12,
+              }}>
+              View More
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{marginTop: 5}}>
+        {resendUser?.map((user, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.imageContainer}
+            onPress={() =>
+              navigation.navigate('CallDetails', {
+                callId: user.receiver_user_id._id,
+                username: user.receiver_user_id.username,
+                email: user.receiver_user_id.email,
+                receiver_user_id: user.receiver_user_id._id,
+                backgroundImage: user.receiver_user_id.backgroundImage,
+                profileImage: user.receiver_user_id.profileImage,
+                call_duration: user.call_duration,
+                call_datetime: user.call_datetime,
+                followers: user.receiver_user_id.followers,
+              })
+            }>
+            <Image
+              style={styles.image}
+              source={{uri: user.receiver_user_id.backgroundImage}}
+            />
+            <View
+              style={{
+                width: '100%',
+                position: 'absolute',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                bottom: 0,
+                paddingHorizontal: 10,
+                paddingVertical: 10,
+              }}>
+              <View>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 12,
+                    fontWeight: '700',
+                  }}>
+                  {user.receiver_user_id.username}
+                </Text>
+              </View>
+              <View>
+                <View>
+                  <Image
+                    style={{width: 50, height: 50, borderRadius: 50}}
+                    source={{uri: user.receiver_user_id.profileImage}}
+                  />
+                </View>
+                <View style={{paddingTop: 5, flexDirection: 'row'}}>
+                  <AntDesign name="star" size={12} color="orange" />
+                  <AntDesign name="star" size={12} color="orange" />
+                  <AntDesign name="star" size={12} color="orange" />
+                  <AntDesign name="star" size={12} color="orange" />
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
 }
 
 export default ResendCall;

@@ -60,16 +60,13 @@ function MyProfileScreen() {
       type: 'image/jpeg',
     });
     try {
-      const response = await fetch(
-        `http://192.168.1.13:8080/auth/editprofile`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: token,
-          },
-          body: formData,
+      const response = await fetch(`http://192.168.1.3:8080/auth/editprofile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: token,
         },
-      );
+        body: formData,
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -88,15 +85,12 @@ function MyProfileScreen() {
   const handleLogout = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(
-        'https://stranger-backend.onrender.com/auth/logout',
-        {
-          method: 'GET',
-          headers: {
-            Authorization: token,
-          },
+      const response = await fetch('http://192.168.1.3/auth/logout', {
+        method: 'GET',
+        headers: {
+          Authorization: token,
         },
-      );
+      });
 
       if (response.ok) {
         await AsyncStorage.removeItem('isLoggedIn');

@@ -91,7 +91,7 @@ function FindCallScreen() {
         return;
       }
 
-      const response = await fetch(`http://192.168.1.13:8080/auth/getrandom`, {
+      const response = await fetch(`http://192.168.1.7:8080/auth/getrandom`, {
         headers: {
           Authorization: token,
         },

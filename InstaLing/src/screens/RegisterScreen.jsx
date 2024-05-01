@@ -32,16 +32,13 @@ function RegisterScreen() {
 
   const handleRegister = async values => {
     try {
-      const response = await fetch(
-        'https://stranger-backend.onrender.com/auth/register',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
+      const response = await fetch('http://192.168.1.6:8080/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify(values),
+      });
 
       if (response.status === 409) {
         Alert.alert('Error', 'Email is already registered');

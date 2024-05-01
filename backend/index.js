@@ -81,10 +81,24 @@ io.on("connection", (socket) => {
     socket.to(roomName).emit("answer", answer, roomName);
   });
 
-  // Handler for cameraState event
-  socket.on("cameraState", (cameraState, roomName) => {
-    console.log("Camera State:", cameraState);
-    socket.to(roomName).emit("cameraState", cameraState);
+  // Event to handle video status updates from clients
+  socket.on("video_status", ({ roomName, videoEnabled }) => {
+    // Broadcast the video status update to all other clients in the same room
+    socket.to(roomName).emit("video_status_update", { videoEnabled });
+    console.log(
+      `Received video status update from ${socket.id}:`,
+      videoEnabled
+    );
+  });
+  // Handle 'hangup' event
+  socket.on("hangup", (roomName) => {
+    // Broadcast the 'hangup' event to all other users in the room
+    socket.to(roomName).emit("hangup");
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
   });
 });
 // Start the server

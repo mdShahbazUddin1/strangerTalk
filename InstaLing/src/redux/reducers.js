@@ -1,38 +1,19 @@
-import {
-  HANG_UP_CALL,
-  SET_APP_BACKGROUND,
-  RANDOM_USER_DISCONNECTED,
-} from './actions';
+import {UPDATE_CALL_DURATION} from './actions';
 
 const initialState = {
-  callActive: true,
-  isBackground: false,
+  callDuration: 0,
 };
 
-const callReducer = (state = initialState, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case HANG_UP_CALL:
+    case UPDATE_CALL_DURATION:
       return {
         ...state,
-        callActive: false,
-      };
-    case 'SET_CALL_ACTIVE':
-      return {
-        ...state,
-        callActive: action.payload,
-      };
-    case SET_APP_BACKGROUND:
-      return {
-        ...state,
-        isBackground: action.payload,
-      };
-    case RANDOM_USER_DISCONNECTED:
-      return {
-        ...state,
+        callDuration: action.payload,
       };
     default:
       return state;
   }
 };
 
-export default callReducer;
+export default reducer;

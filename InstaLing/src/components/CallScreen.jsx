@@ -16,8 +16,11 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Feather from 'react-native-vector-icons/Feather';
+import {disconnectCall, saveCallHistory} from '../utils/api';
+import {updateCallDuration} from '../redux/actions';
+import {useDispatch, useSelector} from 'react-redux';
 
-const socket = io('http://192.168.1.13:8080');
+const socket = io('http://192.168.1.7:8080');
 
 const CallScreen = ({pairedData}) => {
   const [localStream, setLocalStream] = useState(null);
@@ -27,6 +30,9 @@ const CallScreen = ({pairedData}) => {
   const [localUser, setLocalUser] = useState(null);
   const [remoteUser, setRemoteUser] = useState(null);
   const {width, height} = useWindowDimensions();
+  const [callDuration, setCallDuration] = useState(0);
+  const dispatch = useDispatch();
+  const globalCallDuration = useSelector(state => state.callDuration);
 
   const navigation = useNavigation();
 
@@ -44,6 +50,14 @@ const CallScreen = ({pairedData}) => {
       [buttonName]: !prevState[buttonName],
     }));
   };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCallDuration(prevDuration => prevDuration + 1);
+      dispatch(updateCallDuration(callDuration + 1)); // Update Redux store
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [dispatch, callDuration]);
 
   useEffect(() => {
     const initializeStreams = async () => {
@@ -161,16 +175,128 @@ const CallScreen = ({pairedData}) => {
     console.log('Sending offer:', offer);
   };
 
-  const handleHangUp = () => {
-    navigation.replace('Main');
+  const handleHangUp = async () => {
+    // Close the peer connection
+    if (peerConnection) {
+      peerConnection.close();
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+
+    // Release the remote stream
+    setRemoteStream(null);
+
+    // Disconnecting and saving history
+    disconnectCall();
+
+    // Navigate back to the feedback screen
+    const formattedDuration = formatTime(globalCallDuration);
+    const currentRandomUser = pairedData[1];
+
+    if (currentRandomUser) {
+      try {
+        const response = await saveCallHistory(
+          currentRandomUser._id,
+          formattedDuration,
+        );
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
+      // Navigate to feedback screen when returning from background
+      navigation.replace('Feedback', {
+        userId: currentRandomUser._id,
+        username: currentRandomUser.username,
+        profileImage: currentRandomUser.profileImage,
+      });
+    }
+
+    // Emit hangup event to inform the other user
+    socket.emit('hangup', roomName);
   };
+
+  useEffect(() => {
+    const handleHangup = async () => {
+      // Close the peer connection if it exists
+      if (peerConnection) {
+        peerConnection.close();
+      }
+
+      // Release the local stream if it exists
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        setLocalStream(null);
+      }
+
+      // Release the remote stream if it exists
+      setRemoteStream(null);
+
+      // Disconnect
+      disconnectCall();
+
+      const currentRandomUser = pairedData[1];
+      if (currentRandomUser) {
+        let formattedDuration;
+        if (callDuration > 0) {
+          // If call duration is greater than 0, use call duration from Redux
+          formattedDuration = formatTime(globalCallDuration);
+        } else {
+          // Otherwise, use call duration from state
+          formattedDuration = formatTime(callDuration);
+        }
+
+        try {
+          const response = await saveCallHistory(
+            currentRandomUser._id,
+            formattedDuration,
+          );
+          console.log(response);
+        } catch (error) {
+          console.error(error);
+        }
+
+        // Navigate to feedback screen when returning from background
+        navigation.replace('Feedback', {
+          userId: currentRandomUser._id,
+          username: currentRandomUser.username,
+          profileImage: currentRandomUser.profileImage,
+        });
+      }
+    };
+
+    socket.on('hangup', handleHangup);
+
+    return () => {
+      socket.off('hangup', handleHangup);
+    };
+  }, [
+    peerConnection,
+    localStream,
+    pairedData,
+    callDuration,
+    globalCallDuration,
+    navigation,
+  ]);
+
+  const formatTime = time => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <View
       style={[
         styles.container,
         {backgroundColor: remoteStream ? 'transparent' : '#454545'},
       ]}>
-      {remoteStream && (
+      {remoteStream ? (
         <View>
           <RTCView
             streamURL={remoteStream.toURL()}
@@ -189,6 +315,22 @@ const CallScreen = ({pairedData}) => {
               fontSize: 12,
               paddingVertical: 2,
             }}>
+            {remoteUser?.username}
+          </Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: width,
+            height: height,
+          }}>
+          <Image
+            source={{uri: remoteUser?.profileImage}} // Assuming profileImage is the URI of the remote user's profile image
+            style={{width: 100, height: 100, borderRadius: 50}}
+          />
+          <Text style={{color: 'white', marginTop: 10}}>
             {remoteUser?.username}
           </Text>
         </View>
@@ -217,6 +359,19 @@ const CallScreen = ({pairedData}) => {
         </View>
       )}
 
+      <Text
+        style={{
+          position: 'absolute',
+          top: height * 0.01,
+          alignSelf: 'center',
+          color: 'gray',
+          fontWeight: 'bold',
+          fontFamily: 'sans-serif',
+          padding: 5,
+        }}>
+        {formatTime(callDuration)}
+      </Text>
+
       <View
         style={{
           flexDirection: 'row',
@@ -225,7 +380,7 @@ const CallScreen = ({pairedData}) => {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 20,
-          left: remoteStream ? 20 : -160,
+          left: remoteStream ? 20 : (width - 320) / 2,
           bottom: 50,
         }}>
         <TouchableOpacity
@@ -256,6 +411,7 @@ const CallScreen = ({pairedData}) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={handleHangUp}
           style={{
             padding: 10,
             backgroundColor: 'red',
