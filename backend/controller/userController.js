@@ -150,11 +150,18 @@ const getRandomUsers = async (req, res) => {
     );
 
     if (randomUserDocument) {
+      const room = uuid.v4();
       currentUserDocument.connected = true;
+      currentUserDocument.room = room;
       currentUserDocument.save();
+
+      randomUserDocument.connected = true;
+      randomUserDocument.room = room;
+      randomUserDocument.save();
 
       return res.status(201).json({
         message: "Successfully paired",
+        room: room,
         users: [currentUserDocument, randomUserDocument],
       });
     } else {
@@ -174,13 +181,18 @@ const disconnectUsers = async (req, res) => {
     // Find the current user and update searching and connected status to false
     const currentUserDocument = await UserModel.findOneAndUpdate(
       { _id: currentUser._id },
-      { $set: { searching: false, connected: false } },
+      { $set: { searching: false, connected: false, room: null } },
       { new: true }
     );
 
     if (!currentUserDocument) {
       return res.status(404).json({ message: "User not found" });
     }
+    // Also update the other user's room to null
+    await UserModel.updateOne(
+      { room: currentUserDocument.room },
+      { $set: { room: null } }
+    );
 
     return res.status(200).json({ message: "User disconnected successfully" });
   } catch (error) {

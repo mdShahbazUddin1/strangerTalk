@@ -91,17 +91,20 @@ function FindCallScreen() {
         return;
       }
 
-      const response = await fetch(`http://192.168.1.7:8080/auth/getrandom`, {
-        headers: {
-          Authorization: token,
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/getrandom`,
+        {
+          headers: {
+            Authorization: token,
+          },
         },
-      });
+      );
       const data = await response.json();
 
       if (data.message === 'Successfully paired') {
         setPairedData(data.users);
         // console.log(data.users);
-        // setRoomId(data.roomId);
+        setRoomId(data.room);
 
         setIsLoading(false);
         setShowCallScreen(true);
@@ -145,7 +148,7 @@ function FindCallScreen() {
       {isLoading ? (
         <WavyCallIndicator />
       ) : showCallScreen ? (
-        <CallScreen pairedData={pairedData} />
+        <CallScreen pairedData={pairedData} roomId={roomId} />
       ) : null}
     </SafeAreaView>
   );

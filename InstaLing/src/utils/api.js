@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://192.168.1.7:8080'; // Your backend server URL
+const BASE_URL = 'https://stranger-backend.onrender.com'; // Your backend server URL
 
 export const saveCallHistory = async (receiverUserId, call_duration) => {
   const token = await AsyncStorage.getItem('token');

@@ -52,7 +52,7 @@ function FeedBackForm() {
     const token = await AsyncStorage.getItem('token');
     try {
       const response = await fetch(
-        `http://192.168.1.13:8080/feedback/save/${userId}`,
+        `https://stranger-backend.onrender.com/feedback/save/${userId}`,
         {
           method: 'POST',
           headers: {

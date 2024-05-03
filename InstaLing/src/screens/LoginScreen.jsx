@@ -34,13 +34,16 @@ const LoginScreen = () => {
 
   const handleLogin = async values => {
     try {
-      const response = await fetch('http://192.168.1.6:8080/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://stranger-backend.onrender.com/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
         },
-        body: JSON.stringify(values),
-      });
+      );
 
       if (response.status === 403) {
         Alert.alert('Invalid Credentials', 'Email or password is incorrect');

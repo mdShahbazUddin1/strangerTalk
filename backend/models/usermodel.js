@@ -33,6 +33,7 @@ const userSchema = mongoose.Schema(
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    room: { type: String, default: null },
     online: { type: Boolean, default: false },
     searching: { type: Boolean, default: false },
     connected: { type: Boolean, default: false },

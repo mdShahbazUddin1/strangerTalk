@@ -19,8 +19,9 @@ import Feather from 'react-native-vector-icons/Feather';
 import {disconnectCall, saveCallHistory} from '../utils/api';
 import {updateCallDuration} from '../redux/actions';
 import {useDispatch, useSelector} from 'react-redux';
+import InCallManager from 'react-native-incall-manager';
 
-const socket = io('http://192.168.1.7:8080');
+const socket = io('https://stranger-backend.onrender.com');
 
 const CallScreen = ({pairedData}) => {
   const [localStream, setLocalStream] = useState(null);
@@ -33,16 +34,30 @@ const CallScreen = ({pairedData}) => {
   const [callDuration, setCallDuration] = useState(0);
   const dispatch = useDispatch();
   const globalCallDuration = useSelector(state => state.callDuration);
-
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [cameraState, setCameraState] = useState(true);
   const navigation = useNavigation();
+
+  const [isMuted, setIsMuted] = useState(false);
 
   const [selectedButtons, setSelectedButtons] = useState({
     microphone: false,
     camera: false,
     hangup: false,
     video: false,
-    unmute: false,
+    unmute: true,
   });
+
+  useEffect(() => {
+    // Turn on the speakerphone when the component mounts
+    toggleSpeaker();
+
+    return () => {
+      // Cleanup
+      disconnectCall();
+      socket.off('hangup', handleHangUp);
+    };
+  }, []);
 
   const toggleButton = buttonName => {
     setSelectedButtons(prevState => ({
@@ -61,10 +76,27 @@ const CallScreen = ({pairedData}) => {
 
   useEffect(() => {
     const initializeStreams = async () => {
-      const stream = await mediaDevices.getUserMedia({
+      const isFront = true;
+      const devices = await mediaDevices.enumerateDevices();
+      const facing = isFront ? 'front' : 'environment';
+      const videoSourceId = devices.find(
+        device => device.kind === 'videoinput' && device.facing === facing,
+      );
+
+      const constraints = {
         audio: true,
-        video: true,
-      });
+        video: {
+          mandatory: {
+            minWidth: 500, // Provide your own width, height, and frame rate here
+            minHeight: 300,
+            minFrameRate: 30,
+          },
+          facingMode: isFront ? 'user' : 'environment',
+          optional: videoSourceId ? [{sourceId: videoSourceId}] : [],
+        },
+      };
+
+      const stream = await mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
     };
 
@@ -77,21 +109,62 @@ const CallScreen = ({pairedData}) => {
     };
   }, []);
 
+  const switchCamera = () => {
+    localStream.getVideoTracks().forEach(track => track._switchCamera());
+  };
+  const toggleSpeaker = async () => {
+    try {
+      if (isSpeakerOn) {
+        // If speakerphone is currently on, turn it off
+        await InCallManager.setForceSpeakerphoneOn(false);
+        await InCallManager.setSpeakerphoneOn(false);
+        console.log('Speakerphone turned off');
+      } else {
+        // If speakerphone is currently off, turn it on
+        await InCallManager.start({media: 'audio'});
+        await InCallManager.setForceSpeakerphoneOn(true);
+        await InCallManager.setSpeakerphoneOn(true);
+
+        console.log('Speakerphone turned on');
+      }
+
+      // Update the state to reflect the new speakerphone status
+      setIsSpeakerOn(!isSpeakerOn);
+    } catch (err) {
+      console.error('Error toggling speakerphone:', err);
+    }
+  };
+
+  const toggleCamera = () => {
+    setCameraState(prevState => !prevState); // Toggle cameraState
+
+    if (localStream) {
+      localStream.getVideoTracks().forEach(track => {
+        console.log('sc', track);
+        track.enabled = cameraState; // Enable or disable the video track based on cameraState
+      });
+    }
+  };
+
   useEffect(() => {
     if (pairedData.length > 0) {
       setLocalUser(pairedData[0]);
     }
     if (pairedData.length > 1) {
+      const userIds = pairedData.map(user => user._id);
+      const sortedUserIds = userIds.sort();
+      const roomName = sortedUserIds.join('_');
+      setRoomName(roomName);
       setRemoteUser(pairedData[1]);
     }
   }, [pairedData]);
 
   useEffect(() => {
-    const randomRoomName = 'room_123';
-    setRoomName(randomRoomName);
-    socket.emit('join', randomRoomName);
-    console.log('Joining room:', randomRoomName);
-  }, []);
+    if (roomName) {
+      socket.emit('join', roomName);
+      console.log('Joining room:', roomName);
+    }
+  }, [roomName]);
 
   useEffect(() => {
     if (roomName && localStream) {
@@ -157,7 +230,7 @@ const CallScreen = ({pairedData}) => {
 
     pc.ontrack = event => {
       console.log('Remote stream received:', event.streams[0]);
-      setRemoteStream(event.streams[0]);
+      setRemoteStream(event.streams[0]); // Ensure that this line sets the remote stream state
     };
 
     pc.onicecandidate = event => {
@@ -188,6 +261,10 @@ const CallScreen = ({pairedData}) => {
 
     // Release the remote stream
     setRemoteStream(null);
+    // Clear ICE candidates
+    if (peerConnection) {
+      peerConnection.onicecandidate = null;
+    }
 
     // Disconnecting and saving history
     disconnectCall();
@@ -290,17 +367,28 @@ const CallScreen = ({pairedData}) => {
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const toggleMute = () => {
+    if (!remoteStream) {
+      return;
+    }
+    localStream.getAudioTracks().forEach(track => {
+      console.log(track.enabled ? 'muting' : 'unmuting', ' local track', track);
+      track.enabled = !track.enabled;
+      setIsMuted(!track.enabled);
+    });
+  };
+
   return (
     <View
       style={[
         styles.container,
-        {backgroundColor: remoteStream ? 'transparent' : '#454545'},
+        {backgroundColor: remoteStream ? '#454545' : '#454545'},
       ]}>
       {remoteStream ? (
         <View>
           <RTCView
-            streamURL={remoteStream.toURL()}
-            style={{width: width, height: height, marginTop: -45}}
+            streamURL={selectedButtons.video ? remoteStream.toURL() : null}
+            style={{width: width, height: height, marginTop: -40}}
             mirror={true}
           />
           <Text
@@ -335,6 +423,7 @@ const CallScreen = ({pairedData}) => {
           </Text>
         </View>
       )}
+
       {localStream && (
         <View
           style={[
@@ -343,19 +432,37 @@ const CallScreen = ({pairedData}) => {
               height: height * 0.2,
               width: width * 0.3,
               right: remoteStream ? undefined : 250,
-              left: remoteStream ? 250 : undefined,
+              left: remoteStream ? 250 : 250,
             },
           ]}>
           <RTCView
-            style={styles.myStream}
+            style={[
+              styles.myStream,
+              {transform: [{scaleX: selectedButtons.camera ? -1 : 1}]}, // Mirror if back camera is selected
+            ]}
             objectFit="cover"
-            streamURL={localStream.toURL()}
+            streamURL={selectedButtons.video ? localStream.toURL() : null}
             mirror={true}
             zOrder={1}
           />
-          <Text style={{position: 'absolute', bottom: 5, right: 5}}>
-            {localUser?.username}
-          </Text>
+          {selectedButtons.video ? null : (
+            <View
+              style={{
+                position: 'absolute',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+              }}>
+              <Image
+                source={{uri: localUser?.profileImage}} // Assuming profileImage is the URI of the local user's profile image
+                style={{width: 100, height: 100, borderRadius: 50}}
+              />
+              <Text style={{position: 'absolute', bottom: 5, right: 5}}>
+                {localUser?.username}
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -384,7 +491,10 @@ const CallScreen = ({pairedData}) => {
           bottom: 50,
         }}>
         <TouchableOpacity
-          onPress={() => toggleButton('video')}
+          onPress={() => {
+            toggleButton('video');
+            toggleCamera();
+          }}
           style={[
             styles.button,
             selectedButtons.video && styles.selectedButton,
@@ -398,7 +508,10 @@ const CallScreen = ({pairedData}) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => toggleButton('camera')}
+          onPress={() => {
+            toggleButton('camera');
+            switchCamera();
+          }}
           style={[
             styles.button,
             selectedButtons.camera && styles.selectedButton,
@@ -425,7 +538,10 @@ const CallScreen = ({pairedData}) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => toggleButton('microphone')}
+          onPress={() => {
+            toggleButton('microphone');
+            toggleMute();
+          }}
           style={[
             styles.button,
             selectedButtons.microphone && styles.selectedButton,
@@ -438,17 +554,21 @@ const CallScreen = ({pairedData}) => {
             },
           ]}>
           <FontAwesome
-            name="microphone"
+            name={isMuted ? 'microphone-slash' : 'microphone'}
             size={21}
             color={selectedButtons.microphone ? 'black' : 'white'}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => toggleButton('unmute')}
+          onPress={() => {
+            toggleButton('unmute');
+            toggleSpeaker();
+          }}
           style={[
             styles.button,
             selectedButtons.unmute && styles.selectedButton,
+            isSpeakerOn && styles.selectedButton,
             {
               backgroundColor: selectedButtons.unmute ? '#ffffff' : '#454545',
               paddingHorizontal: 11,

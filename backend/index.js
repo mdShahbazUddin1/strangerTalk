@@ -44,14 +44,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handler for mute state event
-  socket.on("muteState", (isMuted) => {
-    console.log("Mute State:", isMuted);
-    // Access roomName from socket object
-    const roomName = Object.keys(socket.rooms)[1]; // Get the second room (the first is always the socket's own room)
-    socket.to(roomName).emit("muteState", isMuted);
-  });
-
   // Handler for ready event
   socket.on("ready", () => {
     console.log("Ready");
@@ -79,16 +71,6 @@ io.on("connection", (socket) => {
     console.log("answer");
     console.log(answer);
     socket.to(roomName).emit("answer", answer, roomName);
-  });
-
-  // Event to handle video status updates from clients
-  socket.on("video_status", ({ roomName, videoEnabled }) => {
-    // Broadcast the video status update to all other clients in the same room
-    socket.to(roomName).emit("video_status_update", { videoEnabled });
-    console.log(
-      `Received video status update from ${socket.id}:`,
-      videoEnabled
-    );
   });
   // Handle 'hangup' event
   socket.on("hangup", (roomName) => {

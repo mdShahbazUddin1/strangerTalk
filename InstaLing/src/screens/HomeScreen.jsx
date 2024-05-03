@@ -53,7 +53,7 @@ function HomeScreen() {
                 color: '#171A1FFF',
                 lineHeight: 26,
               }}>
-              Insta-ling
+              Instalingual
             </Text>
           </View>
           <Pressable>
