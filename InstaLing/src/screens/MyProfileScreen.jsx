@@ -141,16 +141,16 @@ function MyProfileScreen() {
         <TouchableOpacity style={{padding: 5}} onPress={handleLogout}>
           <Text
             style={{
-              color: '#9095A1FF',
-              fontWeight: '400',
-              fontSize: 12,
+              color: 'red',
+              fontWeight: '500',
+              fontSize: 14,
               fontFamily: 'sans-serif',
             }}>
             Logout
           </Text>
         </TouchableOpacity>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{marginTop: 30}}>
         <View>
           {/* ProfileImageUploader */}
           <ProfileImageUploader

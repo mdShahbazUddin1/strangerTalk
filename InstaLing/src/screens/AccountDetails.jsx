@@ -72,6 +72,7 @@ const AccountDetails = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => navigation.navigate('InformationScreen')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

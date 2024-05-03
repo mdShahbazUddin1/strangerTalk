@@ -19,17 +19,17 @@ function UpgradePremium() {
             color: '#ffffff',
             lineHeight: 22,
             fontWeight: '700',
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: 'sans-serif',
           }}>
           Upgrade to premium
         </Text>
-        <View style={{marginTop: 6}}>
+        <View style={{marginTop: 10}}>
           <Text
             style={{
               color: '#ffffff',
               lineHeight: 18,
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: '400',
               fontFamily: 'sans-serif',
               textAlign: 'center',
@@ -39,17 +39,42 @@ function UpgradePremium() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={{
-          marginTop: 15,
-          backgroundColor: '#ffffff',
-          padding: 8,
-          borderRadius: 20,
-        }}>
-        <Text style={{fontSize: 11, color: '#323743FF'}}>
-          Upgrade from ₹ 99
-        </Text>
-      </TouchableOpacity>
+      <View style={{flexDirection: 'row', gap: 5, marginTop: 10}}>
+        <TouchableOpacity
+          style={{
+            marginTop: 15,
+            backgroundColor: '#ffffff',
+            padding: 10,
+            borderRadius: 20,
+          }}>
+          <Text
+            style={{
+              fontSize: 11,
+              color: '#323743FF',
+              fontWeight: '700',
+              fontFamily: 'sans-serif',
+            }}>
+            Upgrade from ₹ 99 / month
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            marginTop: 15,
+            backgroundColor: '#ffffff',
+            padding: 8,
+            borderRadius: 20,
+          }}>
+          <Text
+            style={{
+              fontSize: 11,
+              color: '#323743FF',
+              fontWeight: '700',
+              fontFamily: 'sans-serif',
+            }}>
+            Upgrade from ₹ 599 / year
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

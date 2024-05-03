@@ -494,7 +494,7 @@ const CallScreen = ({pairedData}) => {
           position: 'absolute',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 20,
+          gap: 40,
           left: remoteStream ? 20 : (width - 320) / 2,
           bottom: 50,
         }}>
@@ -541,8 +541,8 @@ const CallScreen = ({pairedData}) => {
             styles.button,
             selectedButtons.microphone && styles.selectedButton,
             {
-              paddingHorizontal: 15,
-              paddingVertical: 11,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
               backgroundColor: selectedButtons.microphone
                 ? '#ffffff'
                 : '#454545',
@@ -550,7 +550,7 @@ const CallScreen = ({pairedData}) => {
           ]}>
           <FontAwesome
             name={isMuted ? 'microphone-slash' : 'microphone'}
-            size={21}
+            size={24}
             color={selectedButtons.microphone ? 'black' : 'white'}
           />
         </TouchableOpacity>
@@ -586,7 +586,7 @@ const CallScreen = ({pairedData}) => {
           ]}>
           <Octicons
             name="unmute"
-            size={22}
+            size={24}
             color={selectedButtons.unmute ? 'black' : 'white'}
           />
         </TouchableOpacity>

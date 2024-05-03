@@ -24,6 +24,7 @@ import AccountDetails from '../screens/AccountDetails';
 import TermsAndConditions from '../screens/TermsAndCondition';
 import Subscription from '../screens/Subscription';
 import CallScreen from '../components/CallScreen';
+import InformationScreen from '../screens/InformationScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -115,6 +116,11 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Subscription"
           component={Subscription}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="InformationScreen"
+          component={InformationScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
