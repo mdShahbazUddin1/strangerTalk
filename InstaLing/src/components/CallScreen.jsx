@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Button,
@@ -36,8 +36,10 @@ const CallScreen = ({pairedData}) => {
   const globalCallDuration = useSelector(state => state.callDuration);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
   const [cameraState, setCameraState] = useState(true);
+  const [callConnected, setCallConnected] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const navigation = useNavigation();
-
+  const [startTimer, setStartTimer] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
   const [selectedButtons, setSelectedButtons] = useState({
@@ -67,12 +69,28 @@ const CallScreen = ({pairedData}) => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCallDuration(prevDuration => prevDuration + 1);
-      dispatch(updateCallDuration(callDuration + 1)); // Update Redux store
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [dispatch, callDuration]);
+    if (startTimer) {
+      const timer = setInterval(() => {
+        setCallDuration(prevDuration => prevDuration + 1);
+        dispatch(updateCallDuration(callDuration + 1)); // Update Redux store
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [dispatch, callDuration, startTimer]);
+
+  useEffect(() => {
+    // Check if both users are connected
+    if (remoteStream && localStream) {
+      setStartTimer(true);
+      setCallConnected(true);
+      const timer = setTimeout(() => {
+        setCallConnected(false);
+      }, 5000); // Display "connected" message for 5 seconds
+      return () => clearTimeout(timer);
+    } else {
+      setCallConnected(false); // Ensure callConnected is false if either stream is not available
+    }
+  }, [remoteStream, localStream]);
 
   useEffect(() => {
     const initializeStreams = async () => {
@@ -109,9 +127,11 @@ const CallScreen = ({pairedData}) => {
     };
   }, []);
 
-  const switchCamera = () => {
-    localStream.getVideoTracks().forEach(track => track._switchCamera());
-  };
+  //Turning camera fron to back
+  // const switchCamera = () => {
+  //   localStream.getVideoTracks().forEach(track => track._switchCamera());
+  // };
+
   const toggleSpeaker = async () => {
     try {
       if (isSpeakerOn) {
@@ -135,16 +155,18 @@ const CallScreen = ({pairedData}) => {
     }
   };
 
-  const toggleCamera = () => {
-    setCameraState(prevState => !prevState); // Toggle cameraState
+  // For turning video on or off
 
-    if (localStream) {
-      localStream.getVideoTracks().forEach(track => {
-        console.log('sc', track);
-        track.enabled = cameraState; // Enable or disable the video track based on cameraState
-      });
-    }
-  };
+  // const toggleCamera = () => {
+  //   setCameraState(prevState => !prevState); // Toggle cameraState
+
+  //   if (localStream) {
+  //     localStream.getVideoTracks().forEach(track => {
+  //       console.log('sc', track);
+  //       track.enabled = cameraState; // Enable or disable the video track based on cameraState
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
     if (pairedData.length > 0) {
@@ -249,6 +271,8 @@ const CallScreen = ({pairedData}) => {
   };
 
   const handleHangUp = async () => {
+    setStartTimer(false);
+    setIsDisconnecting(true);
     // Close the peer connection
     if (peerConnection) {
       peerConnection.close();
@@ -297,6 +321,8 @@ const CallScreen = ({pairedData}) => {
 
   useEffect(() => {
     const handleHangup = async () => {
+      setStartTimer(false);
+      setIsDisconnecting(true);
       // Close the peer connection if it exists
       if (peerConnection) {
         peerConnection.close();
@@ -358,14 +384,14 @@ const CallScreen = ({pairedData}) => {
     navigation,
   ]);
 
-  const formatTime = time => {
+  const formatTime = useCallback(time => {
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
     const seconds = time % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
   const toggleMute = () => {
     if (!remoteStream) {
@@ -384,46 +410,23 @@ const CallScreen = ({pairedData}) => {
         styles.container,
         {backgroundColor: remoteStream ? '#454545' : '#454545'},
       ]}>
-      {remoteStream ? (
-        <View>
-          <RTCView
-            streamURL={selectedButtons.video ? remoteStream.toURL() : null}
-            style={{width: width, height: height, marginTop: -40}}
-            mirror={true}
-          />
-          <Text
-            style={{
-              position: 'absolute',
-              bottom: 50,
-              right: 5,
-              color: 'white',
-              backgroundColor: 'gray',
-              paddingHorizontal: 5,
-              borderRadius: 5,
-              fontSize: 12,
-              paddingVertical: 2,
-            }}>
-            {remoteUser?.username}
-          </Text>
-        </View>
-      ) : (
-        <View
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: width,
-            height: height,
-          }}>
-          <Image
-            source={{uri: remoteUser?.profileImage}} // Assuming profileImage is the URI of the remote user's profile image
-            style={{width: 100, height: 100, borderRadius: 50}}
-          />
-          <Text style={{color: 'white', marginTop: 10}}>
-            {remoteUser?.username}
-          </Text>
-        </View>
-      )}
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: width,
+          height: height,
+        }}>
+        <Image
+          source={{uri: remoteUser?.profileImage}}
+          style={{width: 100, height: 100, borderRadius: 50}}
+        />
+        <Text style={{color: 'white', marginTop: 10}}>
+          {remoteUser?.username}
+        </Text>
+      </View>
 
+      {/* Local user display */}
       {localStream && (
         <View
           style={[
@@ -435,34 +438,22 @@ const CallScreen = ({pairedData}) => {
               left: remoteStream ? 250 : 250,
             },
           ]}>
-          <RTCView
-            style={[
-              styles.myStream,
-              {transform: [{scaleX: selectedButtons.camera ? -1 : 1}]}, // Mirror if back camera is selected
-            ]}
-            objectFit="cover"
-            streamURL={selectedButtons.video ? localStream.toURL() : null}
-            mirror={true}
-            zOrder={1}
-          />
-          {selectedButtons.video ? null : (
-            <View
-              style={{
-                position: 'absolute',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                height: '100%',
-              }}>
-              <Image
-                source={{uri: localUser?.profileImage}} // Assuming profileImage is the URI of the local user's profile image
-                style={{width: 100, height: 100, borderRadius: 50}}
-              />
-              <Text style={{position: 'absolute', bottom: 5, right: 5}}>
-                {localUser?.username}
-              </Text>
-            </View>
-          )}
+          <View
+            style={{
+              position: 'absolute',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
+            }}>
+            <Image
+              source={{uri: localUser?.profileImage}}
+              style={{width: 100, height: 100, borderRadius: 50}}
+            />
+            <Text style={{position: 'absolute', bottom: 5, right: 5}}>
+              {localUser?.username}
+            </Text>
+          </View>
         </View>
       )}
 
@@ -471,13 +462,30 @@ const CallScreen = ({pairedData}) => {
           position: 'absolute',
           top: height * 0.01,
           alignSelf: 'center',
-          color: 'gray',
+          color: 'white',
           fontWeight: 'bold',
           fontFamily: 'sans-serif',
           padding: 5,
         }}>
-        {formatTime(callDuration)}
+        {startTimer
+          ? formatTime(callDuration)
+          : isDisconnecting
+          ? 'Disconnecting...'
+          : 'Connecting...'}
       </Text>
+
+      {callConnected && (
+        <Text
+          style={{
+            color: 'white',
+            position: 'absolute',
+            top: height * 0.04,
+            alignSelf: 'center',
+            padding: 5,
+          }}>
+          Connected
+        </Text>
+      )}
 
       <View
         style={{
@@ -490,7 +498,7 @@ const CallScreen = ({pairedData}) => {
           left: remoteStream ? 20 : (width - 320) / 2,
           bottom: 50,
         }}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
             toggleButton('video');
             toggleCamera();
@@ -522,21 +530,8 @@ const CallScreen = ({pairedData}) => {
             size={24}
             color={selectedButtons.camera ? 'black' : 'white'}
           />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleHangUp}
-          style={{
-            padding: 10,
-            backgroundColor: 'red',
-            paddingHorizontal: 11,
-            borderRadius: 50,
-          }}>
-          <MaterialCommunityIcons
-            name="phone-hangup"
-            size={24}
-            color={'white'}
-          />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+
         <TouchableOpacity
           onPress={() => {
             toggleButton('microphone');
@@ -557,6 +552,21 @@ const CallScreen = ({pairedData}) => {
             name={isMuted ? 'microphone-slash' : 'microphone'}
             size={21}
             color={selectedButtons.microphone ? 'black' : 'white'}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleHangUp}
+          style={{
+            padding: 10,
+            backgroundColor: 'red',
+            paddingHorizontal: 11,
+            borderRadius: 50,
+          }}>
+          <MaterialCommunityIcons
+            name="phone-hangup"
+            size={24}
+            color={'white'}
           />
         </TouchableOpacity>
 
