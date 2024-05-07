@@ -4,7 +4,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
-import {getUserProfile} from '../utils/api';
+import {getUserProfile, sendCallNotification} from '../utils/api';
 
 const FriendsProfile = () => {
   const [friends, setFriends] = useState([]);
@@ -34,7 +34,6 @@ const FriendsProfile = () => {
       );
       if (response.status === 200) {
         const data = await response.json();
-        // console.log('friends', data);
         setFriends(data);
       }
     } catch (error) {
@@ -62,6 +61,17 @@ const FriendsProfile = () => {
       followers: followers,
       following: following,
     });
+  };
+
+  const handleFriendCall = async friend => {
+    try {
+      const sendNotification = await sendCallNotification(friend._id);
+      console.log(sendNotification);
+      setPairedData([user, friend]);
+      navigation.navigate('FriendCalling', {pairedData: [user, friend]});
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -102,18 +112,20 @@ const FriendsProfile = () => {
                   />
                 </TouchableOpacity>
 
-                <View style={{position: 'absolute', bottom: -2, left: 40}}>
-                  {/* <ZegoSendCallInvitationButton
-                    invitees={friends.map(friend => ({
-                      userID: friend._id,
-                      userName: friend.username,
-                    }))}
-                    isVideoCall={false}
-                    resourceID={'zego_data'}
-                    width={25}
-                    height={25}
-                  /> */}
-                </View>
+                <TouchableOpacity
+                  onPress={() => handleFriendCall(friend)}
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    backgroundColor: '#15ABFFFF',
+                    padding: 5,
+                    borderRadius: 50,
+                    marginLeft: 10,
+                    zIndex: 999,
+                  }}>
+                  <Feather name="phone" size={12} color="white" />
+                </TouchableOpacity>
               </View>
 
               <Text

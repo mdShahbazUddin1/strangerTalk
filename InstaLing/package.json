@@ -23,6 +23,7 @@
     "i18n-js": "^4.4.3",
     "react": "18.2.0",
     "react-delegate-component": "^1.0.0",
+    "react-lazyload": "^3.2.1",
     "react-native": "0.73.6",
     "react-native-camera": "^4.2.1",
     "react-native-document-picker": "^9.1.1",

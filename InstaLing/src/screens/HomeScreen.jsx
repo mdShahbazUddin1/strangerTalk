@@ -1,29 +1,73 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, Text, View, Image, Pressable} from 'react-native';
+import {
+  ScrollView,
+  Text,
+  View,
+  Image,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserStatus from '../components/UserStatus';
 import ResendCall from '../components/ResendCall';
 import UserGames from '../components/UserGames';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getCallHistory} from '../utils/api';
+
+import {
+  fetchNotifications,
+  getCallHistory,
+  markNotificationSeen,
+} from '../utils/api';
 import FriendsProfile from '../components/FriendsProfile';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
 
 function HomeScreen() {
   const [recentCall, setRecentCall] = useState([]);
+  const [getNotification, setNotification] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
-    fetchCallHistory();
+    // Display the activity indicator
+    setIsLoading(true);
+
+    // Fetch call history asynchronously after a small delay
+    setTimeout(async () => {
+      try {
+        const callHistory = await getCallHistory();
+        setRecentCall(callHistory);
+        setIsLoading(false);
+      } catch (error) {
+        console.log('Error fetching call history:', error);
+      } finally {
+        // Hide the activity indicator after fetching data
+        setIsLoading(false);
+      }
+    }, 100); // 100 milliseconds delay
   }, []);
 
-  const fetchCallHistory = async () => {
-    try {
-      const callHistory = await getCallHistory();
-      setRecentCall(callHistory);
-    } catch (error) {
-      console.log('Error fetching call history:', error);
-    }
-  };
+  useEffect(() => {
+    const fetchAndSetNotifications = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const data = await fetchNotifications();
+          setNotification(data.notifications);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    const interval = setInterval(fetchAndSetNotifications, 5000);
+
+    // Fetch notifications immediately when the component mounts
+    fetchAndSetNotifications();
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
@@ -56,8 +100,43 @@ function HomeScreen() {
               Instalingual
             </Text>
           </View>
-          <Pressable>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('Notification', {
+                getNotification,
+              })
+            }
+            style={{position: 'relative'}}>
             <Ionicons name="notifications-outline" size={24} color="gray" />
+            {getNotification?.length > 0 ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 1,
+                  width: 13,
+                  height: 13,
+                  borderRadius: 10,
+                  backgroundColor: 'red',
+                  zIndex: 2,
+                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 1,
+                    left: getNotification.length > 9 ? 2 : 4,
+                  }}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      textAlign: 'center',
+                      fontSize: 8,
+                    }}>
+                    {getNotification.length}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
           </Pressable>
         </View>
         {/* status */}
@@ -67,7 +146,15 @@ function HomeScreen() {
         </ScrollView>
 
         {/* Recent Call */}
-        <ResendCall resendUser={recentCall} />
+        {isLoading ? (
+          <ActivityIndicator
+            style={{marginTop: 40}}
+            size="large"
+            color="#6D31EDFF"
+          />
+        ) : (
+          <ResendCall resendUser={recentCall} />
+        )}
 
         {/* Games */}
         <UserGames />

@@ -25,6 +25,10 @@ import TermsAndConditions from '../screens/TermsAndCondition';
 import Subscription from '../screens/Subscription';
 import CallScreen from '../components/CallScreen';
 import InformationScreen from '../screens/InformationScreen';
+import PaymentScreen from '../screens/PaymentScreen';
+import Notification from '../screens/Notification';
+import FriendCalling from '../screens/FriendCalling';
+import CallAlert from '../components/CallAlert';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -124,6 +128,21 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="Notification"
+          component={Notification}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="FriendCalling"
+          component={FriendCalling}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Payment"
+          component={PaymentScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="TermsAndCondtions"
           component={TermsAndConditions}
           options={{headerShown: false}}
@@ -154,6 +173,7 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
       </Stack.Navigator>
+      <CallAlert />
     </NavigationContainer>
   );
 };

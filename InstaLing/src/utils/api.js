@@ -4,8 +4,7 @@ const BASE_URL = 'https://stranger-backend.onrender.com'; // Your backend server
 
 export const saveCallHistory = async (receiverUserId, call_duration) => {
   const token = await AsyncStorage.getItem('token');
-  console.log(receiverUserId, 'receiver_user_id');
-  console.log(call_duration, 'call_duration');
+
   try {
     const response = await fetch(`${BASE_URL}/call/history/${receiverUserId}`, {
       method: 'POST',
@@ -147,5 +146,138 @@ export const getGivenFeedBack = async () => {
   } catch (error) {
     console.log(error.message);
     throw error;
+  }
+};
+
+export const saveFollowNotification = async targetUserId => {
+  const token = await AsyncStorage.getItem('token');
+
+  try {
+    const response = await fetch(
+      `${BASE_URL}/notification/save/${targetUserId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      // console.log('Follow notification saved successfully:', data.success);
+      return data; // Return data if request is successful
+    } else {
+      throw new Error('Failed to save follow notification');
+    }
+  } catch (error) {
+    console.error('Error saving follow notification:', error);
+    throw error; // Throw error if request fails
+  }
+};
+
+export const fetchNotifications = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found');
+      return;
+    }
+
+    const response = await fetch(`${BASE_URL}/notification/getnoti`, {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // console.log('Notifications fetched successfully:', data);
+      return data;
+    } else {
+      console.error('Failed to fetch notifications:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  }
+};
+
+export const markNotificationSeen = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(`${BASE_URL}/notification/markseen`, {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Notifications fetched successfully:', data);
+      return data;
+    } else {
+      console.error('Failed to fetch notifications:');
+    }
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  }
+};
+export const sendCallNotification = async receiverUserId => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(
+      `${BASE_URL}/notification/call/${receiverUserId}`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Call Notification Send Successfully:', data);
+      return data;
+    } else {
+      console.error('Failed to fetch notifications:');
+    }
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  }
+};
+
+export const getCallNotification = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(`${BASE_URL}/notification/getcall`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('You Got New Call', data.recentCallNotifications);
+      return data.recentCallNotifications;
+    } else {
+      throw new Error('Failed to fetch notifications: call');
+    }
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    throw error; // rethrow the error to be caught by the caller
   }
 };

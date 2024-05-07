@@ -45,7 +45,11 @@ function FriendList() {
           style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
         />
       ) : friend.length === 0 ? (
-        <Text style={{textAlign: 'center'}}>No friends, make a call</Text>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{textAlign: 'center', color: 'black'}}>
+            No friends, make a call
+          </Text>
+        </View>
       ) : (
         friend.map(user => {
           return (

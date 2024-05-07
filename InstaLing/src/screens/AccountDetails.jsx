@@ -207,6 +207,7 @@ const AccountDetails = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => navigation.navigate('Payment')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

@@ -1,4 +1,4 @@
-import {View, Text, Pressable} from 'react-native';
+import {View, Text, Pressable, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -193,6 +193,24 @@ const Subscription = () => {
           </View>
         </View>
       </View>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Home')}
+        style={{
+          backgroundColor: '#6D31EDFF',
+          position: 'absolute',
+          bottom: 30,
+          left: 29,
+          marginTop: 60,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          width: 300,
+          padding: 10,
+        }}>
+        <AntDesign name="home" size={24} color={'#ffffff'} />
+        <Text style={{fontSize: 15, color: '#ffffff'}}>Back to home</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

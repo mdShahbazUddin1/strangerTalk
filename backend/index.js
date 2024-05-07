@@ -3,11 +3,12 @@ const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
 const morgan = require("morgan");
-const { ExpressPeerServer } = require("peer");
+
 const connection = require("./config/DB");
 const userRoute = require("./routes/user.routes");
 const historyRoute = require("./routes/callHistory.routes");
 const feedBackRoute = require("./routes/feedback.routes");
+const { notifyRoute } = require("./routes/notify.routes");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 8080;
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/auth", userRoute);
 app.use("/call", historyRoute);
 app.use("/feedback", feedBackRoute);
+app.use("/notification", notifyRoute);
 
 io.on("connection", (socket) => {
   console.log("User Connected" + socket.id);
@@ -66,12 +68,12 @@ io.on("connection", (socket) => {
     socket.to(roomName).emit("offer", offer, roomName);
   });
 
-  // Handler for answer event
   socket.on("answer", (answer, roomName) => {
     console.log("answer");
     console.log(answer);
     socket.to(roomName).emit("answer", answer, roomName);
   });
+
   // Handle 'hangup' event
   socket.on("hangup", (roomName) => {
     // Broadcast the 'hangup' event to all other users in the room

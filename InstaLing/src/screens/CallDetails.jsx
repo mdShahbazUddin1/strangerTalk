@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -9,7 +8,8 @@ import {
   ScrollView,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {getRandomAllFeedBack} from '../utils/api';
+import {getRandomAllFeedBack, saveFollowNotification} from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CallDetails = ({route}) => {
   const {
@@ -39,7 +39,7 @@ const CallDetails = ({route}) => {
   const getAllFeedBack = async () => {
     try {
       const userFeedback = await getRandomAllFeedBack(receiver_user_id);
-      console.log(userFeedback);
+      // console.log(userFeedback);
       setFeedBack(userFeedback);
     } catch (error) {
       console.log(error);
@@ -79,6 +79,7 @@ const CallDetails = ({route}) => {
 
   const handleFollowUser = async () => {
     const token = await AsyncStorage.getItem('token');
+    const followerUsername = await AsyncStorage.getItem('username');
 
     try {
       const response = await fetch(
@@ -86,7 +87,7 @@ const CallDetails = ({route}) => {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application-json',
+            'Content-Type': 'application/json',
             Authorization: token,
           },
         },
@@ -95,6 +96,8 @@ const CallDetails = ({route}) => {
         console.log('User already followed');
       }
       if (response.status === 200) {
+        await saveFollowNotification(receiver_user_id);
+
         setIsFollowed(true);
         checkFollowStatus();
       }

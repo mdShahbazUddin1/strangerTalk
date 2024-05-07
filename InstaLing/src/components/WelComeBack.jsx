@@ -3,13 +3,16 @@ import {StyleSheet, View, Image, ActivityIndicator, Text} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {getUserProfile, getCallHistory} from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WelcomeBack = () => {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [username, setUsername] = useState('');
   useEffect(() => {
     const fetchData = async () => {
+      let name = await AsyncStorage.getItem('username');
+      setUsername(name);
       try {
         const [userProfile, callHistory] = await Promise.all([
           getUserProfile(),
@@ -33,7 +36,7 @@ const WelcomeBack = () => {
             source={require('../../assets/mainIcon.png')}
           />
           <View style={styles.textBox}>
-            <Text style={styles.greet}>Hello Again!</Text>
+            <Text style={styles.greet}>{`Hello ${username}`}</Text>
           </View>
           {/* Show loader if isLoading is true */}
           {isLoading && (

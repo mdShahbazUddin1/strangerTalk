@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {getGivenFeedBack, getRandomAllFeedBack} from '../utils/api';
@@ -24,50 +24,75 @@ const ProfileStatusScreen = ({route}) => {
   const [feedback, setFeedBack] = useState([]);
   const [activeTab, setActiveTab] = useState('Received');
 
-  const recievedFeedBack = async () => {
+  const getFeedBack = useCallback(async () => {
     try {
+      let feed;
       if (activeTab === 'Received') {
-        const recievedFeed = await getRandomAllFeedBack(userId);
-        setFeedBack(recievedFeed);
+        feed = await getRandomAllFeedBack(userId);
       } else {
-        const givenFeedback = await getGivenFeedBack();
-        setFeedBack(givenFeedback);
+        feed = await getGivenFeedBack();
       }
+      setFeedBack(feed);
     } catch (error) {
       console.log(error);
     }
-  };
-  const handleTabPress = tab => {
-    setActiveTab(tab);
-  };
+  }, [activeTab, userId]);
 
   useEffect(() => {
-    recievedFeedBack();
-  }, [activeTab]);
+    getFeedBack();
+  }, [getFeedBack]);
+
+  const handleTabPress = useCallback(tab => {
+    setActiveTab(tab);
+  }, []);
+
+  const renderFeedbackItem = ({item}) => (
+    <View key={item._id} style={{marginTop: 0, marginBottom: 5}}>
+      <Text
+        style={{color: 'black', fontWeight: '700', fontFamily: 'sans-serif'}}>
+        {activeTab === 'Received'
+          ? item?.caller_user_id?.username || item?.receiver_user_id?.username
+          : item?.receiver_user_id?.username || item?.caller_user_id?.username}
+      </Text>
+      {item.feedbackContent.options.map(option => (
+        <Text
+          key={option}
+          style={{
+            color: 'black',
+            marginTop: 5,
+            fontFamily: 'sans-serif',
+            fontSize: 13,
+            padding: 7,
+            backgroundColor: '#F5F5F5',
+          }}>
+          {option}
+        </Text>
+      ))}
+      <Text
+        style={{
+          color: 'black',
+          marginTop: 5,
+          fontFamily: 'sans-serif',
+          fontSize: 13,
+          padding: 7,
+          backgroundColor: '#F5F5F5',
+        }}>
+        {item.feedbackContent.comment}
+      </Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <Image source={{uri: backgroundImage}} style={styles.backgroundImage} />
       <View style={styles.content}>
         <View style={styles.profileContainer}>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              gap: 30,
-            }}>
+          <View style={{flexDirection: 'row', alignItems: 'flex-end', gap: 30}}>
             <View
-              style={{
-                paddingTop: 20,
-                marginLeft: 10,
-                alignItems: 'center',
-              }}>
+              style={{paddingTop: 20, marginLeft: 10, alignItems: 'center'}}>
               <Image
                 style={{width: 65, height: 65, borderRadius: 50}}
-                source={{
-                  uri: profileImage,
-                }}
+                source={{uri: profileImage}}
               />
               <View style={{marginTop: 15}}>
                 <Text style={{color: 'black'}}>{username}</Text>
@@ -87,47 +112,27 @@ const ProfileStatusScreen = ({route}) => {
               </View>
             </View>
             <View>
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'flex-end',
-                    justifyContent: 'space-between',
-                    gap: 65,
-                  }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 65,
+                }}>
+                <View>
                   <View>
-                    <View>
-                      <Text
-                        style={{
-                          fontFamily: 'sans-serif',
-                          fontSize: 14,
-                          fontWeight: '700',
-                          color: '#ffffff',
-                          lineHeight: 30,
-                          textAlign: 'center',
-                        }}>
-                        {username}
-                      </Text>
-                    </View>
-
-                    <View
+                    <Text
                       style={{
-                        backgroundColor: '#F3F4F6FF',
-                        padding: 4,
-                        borderRadius: 5,
+                        fontFamily: 'sans-serif',
+                        fontSize: 14,
+                        fontWeight: '700',
+                        color: '#ffffff',
+                        lineHeight: 30,
+                        textAlign: 'center',
                       }}>
-                      <Text
-                        style={{
-                          fontFamily: 'sans-serif',
-                          fontSize: 11,
-                          fontWeight: '700',
-                          color: '#323743FF',
-                        }}>
-                        {followers.length} followers
-                      </Text>
-                    </View>
+                      {username}
+                    </Text>
                   </View>
-
                   <View
                     style={{
                       backgroundColor: '#F3F4F6FF',
@@ -141,9 +146,25 @@ const ProfileStatusScreen = ({route}) => {
                         fontWeight: '700',
                         color: '#323743FF',
                       }}>
-                      {following.length} followings
+                      {followers.length} followers
                     </Text>
                   </View>
+                </View>
+                <View
+                  style={{
+                    backgroundColor: '#F3F4F6FF',
+                    padding: 4,
+                    borderRadius: 5,
+                  }}>
+                  <Text
+                    style={{
+                      fontFamily: 'sans-serif',
+                      fontSize: 11,
+                      fontWeight: '700',
+                      color: '#323743FF',
+                    }}>
+                    {following.length} followings
+                  </Text>
                 </View>
               </View>
             </View>
@@ -174,61 +195,12 @@ const ProfileStatusScreen = ({route}) => {
           </TouchableOpacity>
         </View>
         {/* Display comments based on the active tab */}
-        <ScrollView style={{flex: 1, marginTop: 20}}>
-          {feedback.length === 0 ? (
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={{color: 'black'}}>No Feedback available!</Text>
-            </View>
-          ) : (
-            feedback.map(feedbackItem => (
-              <View
-                key={feedbackItem._id}
-                style={{marginTop: 0, marginBottom: 5}}>
-                <Text
-                  style={{
-                    color: 'black',
-                    fontWeight: '700',
-                    fontFamily: 'sans-serif',
-                  }}>
-                  {activeTab === 'Received'
-                    ? feedbackItem?.caller_user_id?.username ||
-                      feedbackItem?.receiver_user_id?.username
-                    : feedbackItem?.receiver_user_id?.username ||
-                      feedbackItem?.caller_user_id?.username}
-                </Text>
-                {/* Render options */}
-                {feedbackItem.feedbackContent.options.map(option => (
-                  <Text
-                    key={option}
-                    style={{
-                      color: 'black',
-                      marginTop: 5,
-                      fontFamily: 'sans-serif',
-                      fontSize: 13,
-                      padding: 7,
-                      backgroundColor: '#F5F5F5',
-                    }}>
-                    {option}
-                  </Text>
-                ))}
-                {/* Render comment based on the active tab */}
-
-                <Text
-                  style={{
-                    color: 'black',
-                    marginTop: 5,
-                    fontFamily: 'sans-serif',
-                    fontSize: 13,
-                    padding: 7,
-                    backgroundColor: '#F5F5F5',
-                  }}>
-                  {feedbackItem.feedbackContent.comment}
-                </Text>
-              </View>
-            ))
-          )}
-        </ScrollView>
+        <FlatList
+          data={feedback}
+          renderItem={renderFeedbackItem}
+          keyExtractor={item => item._id}
+          contentContainerStyle={{marginTop: 20}}
+        />
       </View>
     </View>
   );
