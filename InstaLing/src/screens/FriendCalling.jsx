@@ -44,6 +44,7 @@ const FriendCalling = ({route}) => {
   const navigation = useNavigation();
   const [startTimer, setStartTimer] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [ringtone, setRingtone] = useState(true);
 
   const [selectedButtons, setSelectedButtons] = useState({
     microphone: false,
@@ -52,6 +53,40 @@ const FriendCalling = ({route}) => {
     video: false,
     unmute: true,
   });
+
+  useEffect(() => {
+    // Load the ringtone file
+    let ringtoneSound = null;
+    if (ringtone) {
+      ringtoneSound = new Sound(
+        'zego_incoming.mp3',
+        Sound.MAIN_BUNDLE,
+        error => {
+          if (error) {
+            console.error('Failed to load the ringtone:', error);
+            return;
+          }
+          // Start playing the ringtone if not connected
+          if (!callConnected) {
+            ringtoneSound.play(success => {
+              if (success) {
+                console.log('Ringtone started successfully');
+              } else {
+                console.error('Failed to start the ringtone');
+              }
+            });
+          }
+        },
+      );
+    }
+
+    return () => {
+      // Release the sound object when the component unmounts
+      if (ringtoneSound) {
+        ringtoneSound.release();
+      }
+    };
+  }, [ringtone]);
 
   useEffect(() => {
     // Turn on the speakerphone when the component mounts
@@ -84,6 +119,7 @@ const FriendCalling = ({route}) => {
   useEffect(() => {
     // Check if both users are connected
     if (remoteStream && localStream) {
+      setRingtone(false);
       setStartTimer(true);
       setCallConnected(true);
       const timer = setTimeout(() => {
@@ -274,6 +310,7 @@ const FriendCalling = ({route}) => {
   };
 
   const handleHangUp = async () => {
+    setRingtone(false);
     setStartTimer(false);
     setIsDisconnecting(true);
     // Close the peer connection

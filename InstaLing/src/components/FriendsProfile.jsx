@@ -66,8 +66,6 @@ const FriendsProfile = () => {
   const handleFriendCall = async friend => {
     try {
       const sendNotification = await sendCallNotification(friend._id);
-      console.log(sendNotification);
-      setPairedData([user, friend]);
       navigation.navigate('FriendCalling', {pairedData: [user, friend]});
     } catch (error) {
       console.log(error);
