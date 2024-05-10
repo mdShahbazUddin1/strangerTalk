@@ -276,22 +276,42 @@ const LoginScreen = () => {
                     Login
                   </Text>
                 </TouchableOpacity>
-                <Pressable
-                  onPress={() => navigation.navigate('Register')}
-                  style={{marginTop: 10}}>
+                <View
+                  style={{
+                    marginTop: 15,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
                   <Text
                     style={{
                       fontFamily: 'sans-serif',
-                      fontSize: 14,
+                      fontSize: 15,
                       lineHeight: 22,
                       fontWeight: '400',
                       color: '#9095A1FF',
                       textAlign: 'center',
                       paddingBottom: 10,
                     }}>
-                    Don't have an account? Sign Up
+                    Don't have an account ?
                   </Text>
-                </Pressable>
+                  <Pressable
+                    style={{marginLeft: 5}}
+                    onPress={() => navigation.navigate('Register')}>
+                    <Text
+                      style={{
+                        fontFamily: 'sans-serif',
+                        fontSize: 15,
+                        lineHeight: 22,
+                        fontWeight: '500',
+                        color: '#6D31EDFF',
+                        textAlign: 'center',
+                        paddingBottom: 10,
+                      }}>
+                      Create an account
+                    </Text>
+                  </Pressable>
+                </View>
               </>
             )}
           </Formik>

@@ -2,19 +2,12 @@ const { validationResult, body } = require("express-validator");
 const UserModel = require("../models/usermodel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const session = require("express-session");
 const { BlackListModel } = require("../models/blacklist");
-require("dotenv").config();
+const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk");
 const uuid = require("uuid");
-
-AWS.config.update({
-  accessKeyId: process.env.AWSACCESSKEYID,
-  secretAccessKey: process.env.AWSSECRETKEY,
-  region: process.env.AWSREGION,
-});
-
-const s3 = new AWS.S3();
+require("dotenv").config();
 
 const registerValidation = [
   // Validate username
@@ -35,6 +28,129 @@ const registerValidation = [
     .withMessage("Password must be at least 6 characters long"),
 ];
 
+AWS.config.update({
+  accessKeyId: process.env.AWSACCESSKEYID,
+  secretAccessKey: process.env.AWSSECRETKEY,
+  region: process.env.AWSREGION,
+});
+
+const s3 = new AWS.S3();
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// for send mail
+const sendOtpMail = async (username, email, otp) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: "instalingual@gmail.com",
+        pass: "cmklfchsavcpctkj",
+      },
+    });
+
+    const mailOptions = {
+      from: "instalingual@gmail.com",
+      to: email,
+      subject: "For verification mail",
+      html: `
+        <html>
+        <head>
+          <style>
+            /* CSS styles */
+            .container {
+              background-color: #f2f2f2;
+              text-align: center;
+              padding: 20px;
+            }
+            .otp {
+              font-size: 24px;
+              font-weight: bold;
+              color: #ffffff;
+              background-color: #007bff;
+              padding: 10px;
+              border-radius: 5px;
+              display: inline-block;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <p>Hi ${username},</p>
+            <p>Your OTP for verification is:</p>
+            <div class="otp">${otp}</div>
+            <p>Please use this OTP to complete the verification process.</p>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const sendOtp = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+
+    const isUserPresent = await UserModel.findOne({ email });
+
+    if (isUserPresent)
+      return res.status(409).send({ message: "Email is already registered" });
+
+    const otp = generateOTP();
+
+    req.session.otp = otp;
+
+    // Send OTP via email
+    await sendOtpMail(username, email, otp);
+
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const { otp } = req.body; // Assuming the OTP is sent in the request body
+    const sessionOtp = req.session.otp; // Retrieve OTP from session
+
+    if (!sessionOtp) {
+      return res
+        .status(400)
+        .json({ message: "Session expired or OTP not found" });
+    }
+
+    if (otp !== sessionOtp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    delete req.session.otp;
+
+    res.status(200).json({ message: "OTP verified successfully" });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -54,6 +170,7 @@ const register = async (req, res) => {
       email,
       phone,
       password: hashPassword,
+      isVerified: true,
     });
 
     await newUser.save();
@@ -144,6 +261,7 @@ const getRandomUsers = async (req, res) => {
       {
         _id: { $ne: currentUser._id }, // Not equal to the current user
         searching: true,
+        connected: false,
       },
       { $set: { searching: true, connected: true } },
       { new: true }
@@ -431,6 +549,8 @@ const logout = async (req, res) => {
 };
 
 module.exports = {
+  sendOtp,
+  verifyOtp,
   register,
   registerValidation,
   login,

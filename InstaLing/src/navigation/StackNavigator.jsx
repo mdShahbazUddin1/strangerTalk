@@ -29,6 +29,7 @@ import PaymentScreen from '../screens/PaymentScreen';
 import Notification from '../screens/Notification';
 import FriendCalling from '../screens/FriendCalling';
 import CallAlert from '../components/CallAlert';
+import OTPScreen from '../screens/OTPScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -51,13 +52,13 @@ const StackNavigator = () => {
           }}
         />
         <Tab.Screen
-          name="Find"
+          name="Call"
           component={FindCallScreen}
           options={{
             tabBarIcon: ({color}) => (
               <MaterialCommunityIcons
                 name="phone-plus"
-                size={27}
+                size={29}
                 color={color}
               />
             ),
@@ -115,6 +116,11 @@ const StackNavigator = () => {
         <Stack.Screen
           name="MyProfile"
           component={MyProfileScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Otp"
+          component={OTPScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

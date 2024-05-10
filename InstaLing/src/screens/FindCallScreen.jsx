@@ -19,7 +19,6 @@ function FindCallScreen() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [roomId, setRoomId] = useState(null);
   const navigation = useNavigation();
-  const dispatch = useDispatch();
 
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
@@ -63,10 +62,6 @@ function FindCallScreen() {
     } else {
       return true;
     }
-  };
-
-  const handleEndCall = () => {
-    setShowCallScreen(false);
   };
 
   useEffect(() => {
@@ -118,7 +113,7 @@ function FindCallScreen() {
       setIsLoading(false); // Stop loading indicator on error
     }
   };
-  console.log('RoomId', roomId);
+
   if (audioPermission !== true || videoPermission !== true) {
     return (
       <SafeAreaView

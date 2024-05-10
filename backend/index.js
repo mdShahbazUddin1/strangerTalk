@@ -3,7 +3,7 @@ const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
 const morgan = require("morgan");
-
+const session = require("express-session");
 const connection = require("./config/DB");
 const userRoute = require("./routes/user.routes");
 const historyRoute = require("./routes/callHistory.routes");
@@ -15,6 +15,15 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+
+app.use(
+  session({
+    secret: "fekwankfa12378237mdf",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 120000 },
+  })
+);
 
 // Middleware
 app.use(cors());

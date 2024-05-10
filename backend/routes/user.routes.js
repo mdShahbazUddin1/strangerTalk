@@ -15,6 +15,8 @@ const {
   getMutualFriends,
   checkFollowStatus,
   checkRandomUserConnection,
+  sendOtp,
+  verifyOtp,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -29,6 +31,8 @@ const upload = multer({
 });
 
 userRoute.post("/register", registerValidation, register);
+userRoute.post("/sendotp", sendOtp);
+userRoute.post("/verifyotp", verifyOtp);
 userRoute.post("/login", login);
 userRoute.get("/getuser", auth, getLoggedInUser);
 userRoute.get("/getsingleuser", auth, getSingleUser);

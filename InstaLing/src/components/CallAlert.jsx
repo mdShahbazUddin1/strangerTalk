@@ -42,30 +42,33 @@ const CallAlert = () => {
 
   useEffect(() => {
     const fetchRecentCalls = async () => {
-      try {
-        const callNotifications = await getCallNotification();
-        setRecentCallNotifications(callNotifications);
-        const notification = callNotifications[0];
-        if (notification) {
-          const user = notification.follow_target;
-          const friend = notification.user;
-          const userProfile = await getUserProfile(user._id);
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        try {
+          const callNotifications = await getCallNotification();
+          setRecentCallNotifications(callNotifications);
+          const notification = callNotifications[0];
+          if (notification) {
+            const user = notification.follow_target;
+            const friend = notification.user;
+            const userProfile = await getUserProfile(user._id);
 
-          const currentTimestamp = Date.now();
-          if (currentTimestamp - lastAlertTimestamp > 5000) {
-            setCallerInfo({user, friend, userProfile});
-            setIsModalVisible(true);
-            console.log('Modal is visible:', true);
-            setLastAlertTimestamp(currentTimestamp);
+            const currentTimestamp = Date.now();
+            if (currentTimestamp - lastAlertTimestamp > 5000) {
+              setCallerInfo({user, friend, userProfile});
+              setIsModalVisible(true);
+              console.log('Modal is visible:', true);
+              setLastAlertTimestamp(currentTimestamp);
 
-            // Play the ringtone
-            if (ringtone) {
-              ringtone.play();
+              // Play the ringtone
+              if (ringtone) {
+                ringtone.play();
+              }
             }
           }
+        } catch (error) {
+          console.error('Error fetching recent call notifications:', error);
         }
-      } catch (error) {
-        console.error('Error fetching recent call notifications:', error);
       }
     };
 

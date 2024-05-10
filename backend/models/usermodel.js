@@ -20,15 +20,8 @@ const userSchema = mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: function () {
-        const profiles = [
-          "https://plus.unsplash.com/premium_photo-1681426472026-60d4bf7b69a1?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          "https://images.unsplash.com/photo-1638643391904-9b551ba91eaa?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D",
-          "https://images.unsplash.com/photo-1639503611585-1054af5dbfab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDN8fHxlbnwwfHx8fHw%3D",
-        ];
-        const randomIndex = Math.floor(Math.random() * profiles.length);
-        return profiles[randomIndex];
-      },
+      default:
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
     },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
@@ -37,6 +30,7 @@ const userSchema = mongoose.Schema(
     online: { type: Boolean, default: false },
     searching: { type: Boolean, default: false },
     connected: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
   },
 
   { versionKey: false }

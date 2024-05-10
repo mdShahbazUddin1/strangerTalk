@@ -12,6 +12,7 @@ import {
   Platform,
   Keyboard,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -20,6 +21,9 @@ import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
+import {sendOtp} from '../utils/api';
+// import auth from '@react-native-firebase/auth';
+// import {isValidPhoneNumber, parsePhoneNumber} from 'libphonenumber-js';
 
 function RegisterScreen() {
   const [isFocusedUsername, setIsFocusedUsername] = useState(false);
@@ -28,33 +32,25 @@ function RegisterScreen() {
   const [isFocusedPhoneNumber, setIsFocusedPhoneNumber] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
   const handleRegister = async values => {
     try {
-      const response = await fetch(
-        'https://stranger-backend.onrender.com/auth/register',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        },
-      );
-
-      if (response.status === 409) {
-        Alert.alert('Error', 'Email is already registered');
-      }
-      if (response.status === 200) {
-        Alert.alert(
-          'Registration successful',
-          'You have successfully registered.',
-          [{text: 'OK', onPress: () => navigation.navigate('Login')}],
-        );
+      setLoading(true);
+      const response = await sendOtp(values.username, values.email);
+      if (response.message === 'OTP sent successfully') {
+        navigation.navigate('Otp', {values});
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to register. Please try again later.');
+      console.error('Error sending OTP:', error);
+      if (error.message === 'Email is already registered') {
+        Alert.alert('Error', 'Email is already registered');
+      } else {
+        Alert.alert('Error', 'Failed to send OTP. Please try again later.');
+      }
+    } finally {
+      setLoading(false); // Set loading to false after registration attempt
     }
   };
 
@@ -294,33 +290,58 @@ function RegisterScreen() {
                     paddingVertical: 15,
                     borderRadius: 10,
                   }}
-                  onPress={handleSubmit}>
-                  <Text
-                    style={{
-                      color: '#ffffff',
-                      fontSize: 16,
-                      fontWeight: '400',
-                      textAlign: 'center',
-                    }}>
-                    Register
-                  </Text>
+                  onPress={handleSubmit}
+                  disabled={loading}>
+                  {loading ? (
+                    <ActivityIndicator color="#ffffff" /> // Display loader when loading
+                  ) : (
+                    <Text
+                      style={{
+                        color: '#ffffff',
+                        fontSize: 16,
+                        fontWeight: '400',
+                        textAlign: 'center',
+                      }}>
+                      Register
+                    </Text>
+                  )}
                 </TouchableOpacity>
-                <Pressable
-                  onPress={() => navigation.navigate('Login')}
-                  style={{margin: 10}}>
+                <View
+                  style={{
+                    marginTop: 15,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
                   <Text
                     style={{
                       fontFamily: 'sans-serif',
-                      fontSize: 14,
+                      fontSize: 15,
                       lineHeight: 22,
                       fontWeight: '400',
                       color: '#9095A1FF',
                       textAlign: 'center',
-                      paddingBottom: 20,
+                      paddingBottom: 10,
                     }}>
-                    Already have an account? Login
+                    Already have an account ?
                   </Text>
-                </Pressable>
+                  <Pressable
+                    style={{marginLeft: 5}}
+                    onPress={() => navigation.navigate('Login')}>
+                    <Text
+                      style={{
+                        fontFamily: 'sans-serif',
+                        fontSize: 15,
+                        lineHeight: 22,
+                        fontWeight: '500',
+                        color: '#6D31EDFF',
+                        textAlign: 'center',
+                        paddingBottom: 10,
+                      }}>
+                      Login
+                    </Text>
+                  </Pressable>
+                </View>
               </>
             )}
           </Formik>
