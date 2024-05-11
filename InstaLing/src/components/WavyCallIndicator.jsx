@@ -10,6 +10,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
 import Ring from './Ring';
 import {useNavigation} from '@react-navigation/native';
+import {disconnectCall} from '../utils/api';
 
 const _color = '#6E01EF';
 const _size = 90;
@@ -18,6 +19,7 @@ const WavyCallIndicator = () => {
   const navigation = useNavigation();
 
   const handleEndCall = () => {
+    disconnectCall();
     navigation.replace('Main');
   };
   return (

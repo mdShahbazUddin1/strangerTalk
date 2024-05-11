@@ -229,6 +229,7 @@ export const markNotificationSeen = async () => {
     console.error('Error fetching notifications:', error);
   }
 };
+
 export const sendCallNotification = async receiverUserId => {
   try {
     const token = await AsyncStorage.getItem('token');

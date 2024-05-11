@@ -261,31 +261,64 @@ const getRandomUsers = async (req, res) => {
       {
         _id: { $ne: currentUser._id }, // Not equal to the current user
         searching: true,
-        connected: false,
       },
-      { $set: { searching: true, connected: true } },
+      { $set: { searching: true } },
       { new: true }
     );
 
     if (randomUserDocument) {
-      const room = uuid.v4();
-      currentUserDocument.connected = true;
-      currentUserDocument.room = room;
-      currentUserDocument.save();
+      // Store pairing information for both users
+      currentUserDocument.pairedUserId = randomUserDocument._id;
+      randomUserDocument.pairedUserId = currentUserDocument._id;
 
-      randomUserDocument.connected = true;
-      randomUserDocument.room = room;
-      randomUserDocument.save();
+      await currentUserDocument.save();
+      await randomUserDocument.save();
 
-      return res.status(201).json({
-        message: "Successfully paired",
-        room: room,
-        users: [currentUserDocument, randomUserDocument],
-      });
+      return res.status(200).json({ message: "Successfully paired" });
     } else {
       // If no suitable random user found, return waiting message
       return res.status(200).json({ message: "Waiting for a match..." });
     }
+  } catch (error) {
+    // Handle errors
+    return res.status(500).json({ message: "Error: " + error.message });
+  }
+};
+
+const getPairedUserDetails = async (req, res) => {
+  try {
+    const currentUser = req.userId;
+    console.log(currentUser);
+    // Find the current user by ID
+    const currentUserDocument = await UserModel.findById(currentUser);
+    if (!currentUserDocument) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    // Retrieve the paired user's details using the paired user ID
+    const pairedUserId = currentUserDocument.pairedUserId;
+    if (!pairedUserId) {
+      return res.status(404).json({ message: "No paired user found" });
+    }
+
+    const pairedUserDocument = await UserModel.findById(pairedUserId);
+    if (!pairedUserDocument) {
+      return res.status(404).json({ message: "Paired user not found" });
+    }
+
+    // Update fields for both users
+    currentUserDocument.connected = true;
+    currentUserDocument.searching = false;
+    await currentUserDocument.save();
+
+    pairedUserDocument.connected = true;
+    pairedUserDocument.searching = false;
+    await pairedUserDocument.save();
+
+    // Return the details of both users
+    return res.status(200).json({
+      users: [currentUserDocument, pairedUserDocument],
+    });
   } catch (error) {
     // Handle errors
     return res.status(500).json({ message: "Error: " + error.message });
@@ -299,7 +332,14 @@ const disconnectUsers = async (req, res) => {
     // Find the current user and update searching and connected status to false
     const currentUserDocument = await UserModel.findOneAndUpdate(
       { _id: currentUser._id },
-      { $set: { searching: false, connected: false, room: null } },
+      {
+        $set: {
+          searching: false,
+          connected: false,
+          room: null,
+          pairedUserId: null,
+        },
+      },
       { new: true }
     );
 
@@ -309,7 +349,7 @@ const disconnectUsers = async (req, res) => {
     // Also update the other user's room to null
     await UserModel.updateOne(
       { room: currentUserDocument.room },
-      { $set: { room: null } }
+      { $set: { room: null, pairedUserId: null } }
     );
 
     return res.status(200).json({ message: "User disconnected successfully" });
@@ -549,6 +589,7 @@ const logout = async (req, res) => {
 };
 
 module.exports = {
+  getPairedUserDetails,
   sendOtp,
   verifyOtp,
   register,

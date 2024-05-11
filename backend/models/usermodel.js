@@ -31,6 +31,11 @@ const userSchema = mongoose.Schema(
     searching: { type: Boolean, default: false },
     connected: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
+    pairedUserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
 
   { versionKey: false }

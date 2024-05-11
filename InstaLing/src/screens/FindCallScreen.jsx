@@ -17,7 +17,6 @@ function FindCallScreen() {
   const [pairedData, setPairedData] = useState([]);
   const [isAppActive, setIsAppActive] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [roomId, setRoomId] = useState(null);
   const navigation = useNavigation();
 
   const requestCameraPermission = async () => {
@@ -77,15 +76,37 @@ function FindCallScreen() {
     getUser();
   }, []);
 
-  const getUser = async () => {
+  const getPairedData = async () => {
+    const token = await AsyncStorage.getItem('token');
     try {
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        navigation.navigate('Login');
-        return;
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/getpaired`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        },
+      );
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data, '--------------');
+        setPairedData(data.users);
+        setIsLoading(false);
+        setShowCallScreen(true);
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  const getUser = async () => {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
       const response = await fetch(
         `https://stranger-backend.onrender.com/auth/getrandom`,
         {
@@ -94,23 +115,16 @@ function FindCallScreen() {
           },
         },
       );
+
       const data = await response.json();
-
       if (data.message === 'Successfully paired') {
-        setPairedData(data.users);
-        // console.log(data.users);
-        setRoomId(data.room);
-
-        setIsLoading(false);
-        setShowCallScreen(true);
-        // console.log('paired', pairedData);
+        await getPairedData();
       } else {
         setTimeout(getUser, 1000);
         console.log('Waiting for a match...');
       }
     } catch (error) {
       console.error('Error getting random users:', error);
-      setIsLoading(false); // Stop loading indicator on error
     }
   };
 
@@ -143,7 +157,7 @@ function FindCallScreen() {
       {isLoading ? (
         <WavyCallIndicator />
       ) : showCallScreen ? (
-        <CallScreen pairedData={pairedData} roomId={roomId} />
+        <CallScreen pairedData={pairedData} />
       ) : null}
     </SafeAreaView>
   );

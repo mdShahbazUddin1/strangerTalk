@@ -21,7 +21,7 @@ import {updateCallDuration} from '../redux/actions';
 import {useDispatch, useSelector} from 'react-redux';
 import InCallManager from 'react-native-incall-manager';
 
-const socket = io('https://192.168.1.2:8080');
+const socket = io('https://stranger-backend.onrender.com');
 
 const CallScreen = ({pairedData}) => {
   const [localStream, setLocalStream] = useState(null);

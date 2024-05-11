@@ -17,6 +17,7 @@ const {
   checkRandomUserConnection,
   sendOtp,
   verifyOtp,
+  getPairedUserDetails,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -37,6 +38,7 @@ userRoute.post("/login", login);
 userRoute.get("/getuser", auth, getLoggedInUser);
 userRoute.get("/getsingleuser", auth, getSingleUser);
 userRoute.get("/getrandom", auth, getRandomUsers);
+userRoute.get("/getpaired", auth, getPairedUserDetails);
 userRoute.put(
   "/editprofile",
   auth,
