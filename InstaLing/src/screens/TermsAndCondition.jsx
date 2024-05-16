@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {
   View,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 
 const TermsAndConditions = () => {
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -800,8 +802,10 @@ const TermsAndConditions = () => {
           </Text>
         </View>
       </ScrollView>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, styles.acceptButton]}>
+      {/* <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Home')}
+          style={[styles.button, styles.acceptButton]}>
           <Text style={styles.buttonText}>Agree & Continue</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.declineButton]}>
@@ -815,7 +819,7 @@ const TermsAndConditions = () => {
             Decline
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };

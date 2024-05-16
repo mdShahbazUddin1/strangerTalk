@@ -107,6 +107,11 @@ function RegisterScreen() {
     setShowPassword(prevShowPassword => !prevShowPassword);
   };
 
+  const handleTermsCheck = () => {
+    setTermsChecked(prevChecked => !prevChecked);
+    setCheckboxError(''); // Clear checkbox error when checked
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -142,6 +147,7 @@ function RegisterScreen() {
               values,
               errors,
               touched,
+              setFieldValue,
             }) => (
               <>
                 <View style={styles.textBox}>
@@ -281,6 +287,25 @@ function RegisterScreen() {
                     <Text style={styles.errorText}>{errors.phone}</Text>
                   )}
                 </View>
+                <View style={styles.checkboxContainer}>
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => {
+                      setFieldValue('termsChecked', !values.termsChecked);
+                    }}>
+                    <FontAwesome
+                      name={values.termsChecked ? 'check-square-o' : 'square-o'}
+                      size={20}
+                      color={values.termsChecked ? '#6D31EDFF' : '#9095A1FF'}
+                    />
+                    <Text style={styles.checkboxText}>
+                      I agree to the terms and conditions
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {touched.termsChecked && errors.termsChecked && (
+                  <Text style={styles.errorText}>{errors.termsChecked}</Text>
+                )}
                 <TouchableOpacity
                   style={{
                     width: '100%',
@@ -290,8 +315,7 @@ function RegisterScreen() {
                     paddingVertical: 15,
                     borderRadius: 10,
                   }}
-                  onPress={handleSubmit}
-                  disabled={loading}>
+                  onPress={handleSubmit}>
                   {loading ? (
                     <ActivityIndicator color="#ffffff" /> // Display loader when loading
                   ) : (
@@ -312,6 +336,7 @@ function RegisterScreen() {
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    marginBottom: 10,
                   }}>
                   <Text
                     style={{
@@ -360,6 +385,10 @@ const validationSchema = Yup.object().shape({
   phone: Yup.string() // Changed from phoneNumber to phone
     .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
     .required('Phone number is required'),
+  termsChecked: Yup.boolean().oneOf(
+    [true],
+    'Please agree to the terms and conditions',
+  ),
 });
 
 const styles = StyleSheet.create({
@@ -372,7 +401,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 70,
+    marginTop: 40,
   },
   mainIcon: {
     width: 74,
@@ -440,6 +469,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 6,
     textAlign: 'left',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  checkbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxText: {
+    color: 'black',
+    marginLeft: 8,
   },
 });
 

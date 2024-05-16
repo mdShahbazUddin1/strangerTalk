@@ -98,7 +98,7 @@ const AccountDetails = () => {
                   color={'gray'}
                 />
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -123,7 +123,7 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>
@@ -180,7 +180,7 @@ const AccountDetails = () => {
                   color={'gray'}
                 />
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -205,8 +205,8 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </TouchableOpacity> */}
+              {/* <TouchableOpacity
                 onPress={() => navigation.navigate('Payment')}
                 style={{
                   flexDirection: 'row',
@@ -232,8 +232,8 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </TouchableOpacity> */}
+              {/* <TouchableOpacity
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -257,7 +257,7 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>

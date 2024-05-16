@@ -20,14 +20,22 @@ function FeedBackForm() {
 
   const [rating, setRating] = useState(0);
   const interests = [
-    'Character Development',
-    'Plot & Storyline',
-    'Writing Style',
-    'Pacing & Flow',
-    'Originality & Creativity',
-    'Dialogue',
-    'Humor & Wit',
-    'Character Relationships',
+    'Intelligent',
+    'Kind',
+    'Knowledgeable',
+    'Friendly',
+    'Encouraging',
+    'Supportive',
+    'Skilled',
+    'Great Listener',
+    'Optimistic',
+    'Well Spoken',
+    'Open Minded',
+    'Versatile',
+    'Inspiring',
+    'Generous',
+    'Talented',
+    'Charming',
   ];
 
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -98,9 +106,9 @@ function FeedBackForm() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity>
-              <Text style={{color: 'red', fontSize: 14, fontWeight: '400'}}>
+              {/* <Text style={{color: 'red', fontSize: 14, fontWeight: '400'}}>
                 Block
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
 

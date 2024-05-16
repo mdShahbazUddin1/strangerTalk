@@ -12,6 +12,7 @@ import {
   ScrollView,
   Keyboard,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -30,10 +31,12 @@ const LoginScreen = () => {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [emailValid, setEmailValid] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
   const handleLogin = async values => {
     try {
+      setLoading(true);
       const response = await fetch(
         'https://stranger-backend.onrender.com/auth/login',
         {
@@ -66,6 +69,8 @@ const LoginScreen = () => {
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to login. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -242,7 +247,10 @@ const LoginScreen = () => {
                     marginTop: 20,
                   }}>
                   <View>
-                    <Pressable>
+                    <Pressable
+                      onPress={() =>
+                        navigation.navigate('ForgotPasswordScreen')
+                      }>
                       <Text
                         style={{
                           fontFamily: 'sans-serif',
@@ -266,15 +274,19 @@ const LoginScreen = () => {
                     borderRadius: 10,
                   }}
                   onPress={handleSubmit}>
-                  <Text
-                    style={{
-                      color: '#ffffff',
-                      fontSize: 16,
-                      fontWeight: '400',
-                      textAlign: 'center',
-                    }}>
-                    Login
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <Text
+                      style={{
+                        color: '#ffffff',
+                        fontSize: 16,
+                        fontWeight: '400',
+                        textAlign: 'center',
+                      }}>
+                      Login
+                    </Text>
+                  )}
                 </TouchableOpacity>
                 <View
                   style={{
@@ -315,7 +327,7 @@ const LoginScreen = () => {
               </>
             )}
           </Formik>
-          <View
+          {/* <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -350,7 +362,7 @@ const LoginScreen = () => {
               }}>
               <AntDesign name="google" size={22} color="red" />
             </Pressable>
-          </View>
+          </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

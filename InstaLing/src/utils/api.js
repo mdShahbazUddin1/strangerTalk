@@ -304,6 +304,26 @@ export const sendOtp = async (username, email, otp) => {
     throw error; // Propagate the error for handling by the caller
   }
 };
+export const sendPassOtp = async email => {
+  try {
+    const response = await fetch(`${BASE_URL}/auth/sendpasswordotp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({email}),
+    });
+    const responseData = await response.json();
+    if (!response.ok) {
+      throw new Error(responseData.message);
+    }
+
+    return responseData;
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    throw error; // Propagate the error for handling by the caller
+  }
+};
 
 export const verifyOtp = async otp => {
   try {

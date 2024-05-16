@@ -30,6 +30,10 @@ import Notification from '../screens/Notification';
 import FriendCalling from '../screens/FriendCalling';
 import CallAlert from '../components/CallAlert';
 import OTPScreen from '../screens/OTPScreen';
+import ForgotPasswordScreen from '../screens/ForgotPassword';
+import PasswordOtp from '../screens/PasswordOtp';
+import ChangePass from '../screens/ChangePass';
+import MainScreen from '../screens/MainScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -89,8 +93,8 @@ const StackNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
-          name="Login"
-          component={LoginScreen}
+          name="MainScreen"
+          component={MainScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
@@ -98,6 +102,12 @@ const StackNavigator = () => {
           component={RegisterScreen}
           options={{headerShown: false}}
         />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{headerShown: false}}
+        />
+
         <Stack.Screen
           name="Main"
           component={BottomTabs}
@@ -124,8 +134,23 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="PasswordOtp"
+          component={PasswordOtp}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="ChangePass"
+          component={ChangePass}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="Subscription"
           component={Subscription}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="ForgotPasswordScreen"
+          component={ForgotPasswordScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

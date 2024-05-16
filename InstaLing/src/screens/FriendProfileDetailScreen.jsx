@@ -146,7 +146,7 @@ const FriendProfileDetailScreen = ({route}) => {
             justifyContent: 'space-between',
             marginTop: 30,
           }}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               width: 150,
               backgroundColor: '#6D31EDFF',
@@ -164,7 +164,7 @@ const FriendProfileDetailScreen = ({route}) => {
               }}>
               Call
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={{
               width: 150,

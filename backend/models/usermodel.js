@@ -36,6 +36,7 @@ const userSchema = mongoose.Schema(
       ref: "User",
       default: null,
     },
+    termsAndConditions: { type: Boolean, default: false },
   },
 
   { versionKey: false }

@@ -217,7 +217,7 @@ const CallDetails = ({route}) => {
             justifyContent: 'space-between',
             marginTop: 30,
           }}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               width: 150,
               backgroundColor: '#6D31EDFF',
@@ -235,7 +235,7 @@ const CallDetails = ({route}) => {
               }}>
               Call
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={{
               width: 150,
@@ -273,7 +273,7 @@ const CallDetails = ({route}) => {
       <View style={{flex: 1, margin: 15}}>
         <View style={{margin: 0}}>
           <TouchableOpacity>
-            <Text style={styles.commentOption}>Received</Text>
+            <Text style={styles.commentOption}>Received feedback</Text>
           </TouchableOpacity>
         </View>
         {/* Display given or received comments based on the state */}

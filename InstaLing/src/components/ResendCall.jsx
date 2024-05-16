@@ -93,7 +93,7 @@ function ResendCall({resendUser}) {
             Recent Call
           </Text>
         </View>
-        <View>
+        {/* <View>
           <TouchableOpacity>
             <Text
               style={{
@@ -104,7 +104,7 @@ function ResendCall({resendUser}) {
               View More
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
       <FlatList
         data={resendUser}

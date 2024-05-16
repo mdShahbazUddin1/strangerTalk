@@ -160,7 +160,7 @@ function FriendList() {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                       }}>
-                      <TouchableOpacity
+                      {/* <TouchableOpacity
                         style={{
                           width: 104,
                           backgroundColor: '#6D31EDFF',
@@ -178,7 +178,7 @@ function FriendList() {
                           }}>
                           Call
                         </Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
                       <TouchableOpacity
                         style={{
                           width: 104,
@@ -203,8 +203,6 @@ function FriendList() {
                   </View>
                 </View>
               </View>
-
-              <UpgradePremium />
             </>
           );
         })

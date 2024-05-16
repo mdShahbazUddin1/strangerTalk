@@ -7,16 +7,16 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {sendOtp, verifyOtp} from '../utils/api';
+import {sendPassOtp, verifyOtp} from '../utils/api';
 import {useNavigation} from '@react-navigation/native';
 
-const OTPScreen = ({route}) => {
-  const {values} = route.params;
+const PasswordOtp = ({route}) => {
+  const {email} = route.params;
   const navigation = useNavigation();
 
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(120); // Timer in seconds
-  const intervalRef = useRef(null);
+  const intervalRef = useRef(null); // Use ref to store interval
 
   useEffect(() => {
     startTimer();
@@ -53,27 +53,8 @@ const OTPScreen = ({route}) => {
       const response = await verifyOtp(otp); // Call verifyOtp function
 
       if (response.message == 'OTP verified successfully') {
+        navigation.navigate('ChangePass', {email});
         try {
-          const response = await fetch(
-            'https://stranger-backend.onrender.com/auth/register',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(values),
-            },
-          );
-          if (response.status === 409) {
-            Alert.alert('Error', 'Email is already registered');
-          }
-          if (response.status === 200) {
-            Alert.alert(
-              'Registration successful',
-              'You have successfully registered.',
-              [{text: 'OK', onPress: () => navigation.replace('Login')}],
-            );
-          }
         } catch (error) {
           console.log(error);
         }
@@ -86,13 +67,13 @@ const OTPScreen = ({route}) => {
 
   const handleResendOTP = async () => {
     try {
-      await sendOtp(values.username, values.email);
+      await sendPassOtp(email);
       Alert.alert('OTP send', 'Please check your email for otp.', [
         {text: 'OK'},
       ]);
       setOtp(''); // Clear OTP input
       setTimer(120); // Reset timer
-      startTimer();
+      startTimer(); // Restart timer
     } catch (error) {
       console.error('Error sending OTP:', error);
       Alert.alert('Error', 'Failed to send OTP. Please try again later.');
@@ -118,7 +99,7 @@ const OTPScreen = ({route}) => {
       <View style={{marginTop: 50, alignItems: 'center'}}>
         <Text style={{color: 'black', fontSize: 18}}>Verify your email</Text>
         <Text style={{color: 'black', marginTop: 2, fontSize: 14}}>
-          Enter 6 digit code recieved on your email
+          Enter 6 digit code received on your email
         </Text>
       </View>
       <Text style={styles.header}>Enter OTP</Text>
@@ -221,4 +202,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OTPScreen;
+export default PasswordOtp;
