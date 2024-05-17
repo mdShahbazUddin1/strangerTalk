@@ -41,7 +41,7 @@ const AccountDetails = () => {
             }}>
             <View
               style={{
-                paddingVertical: 25,
+                paddingVertical: 20,
                 paddingHorizontal: 10,
               }}>
               <TouchableOpacity
@@ -72,12 +72,38 @@ const AccountDetails = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation.navigate('InformationScreen')}
+                onPress={() => navigation.navigate('Friends')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   marginBottom: 20,
+                }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Feather name="users" size={22} color={'gray'} />
+                  <Text
+                    style={{
+                      color: 'gray',
+                      marginLeft: 10,
+                      fontFamily: 'sans-serif',
+                      fontSize: 14,
+                    }}>
+                    Friend List
+                  </Text>
+                </View>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={25}
+                  color={'gray'}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('InformationScreen')}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <Feather name="info" size={22} color={'gray'} />
@@ -98,6 +124,7 @@ const AccountDetails = () => {
                   color={'gray'}
                 />
               </TouchableOpacity>
+
               {/* <TouchableOpacity
                 style={{
                   flexDirection: 'row',
@@ -180,7 +207,7 @@ const AccountDetails = () => {
                   color={'gray'}
                 />
               </TouchableOpacity>
-              {/* <TouchableOpacity
+              <TouchableOpacity
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -205,7 +232,7 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity> */}
+              </TouchableOpacity>
               {/* <TouchableOpacity
                 onPress={() => navigation.navigate('Payment')}
                 style={{
@@ -233,7 +260,8 @@ const AccountDetails = () => {
                   color={'gray'}
                 />
               </TouchableOpacity> */}
-              {/* <TouchableOpacity
+              <TouchableOpacity
+                onPress={() => navigation.navigate('HelpAndSupport')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -257,7 +285,7 @@ const AccountDetails = () => {
                   size={25}
                   color={'gray'}
                 />
-              </TouchableOpacity> */}
+              </TouchableOpacity>
             </View>
           </View>
         </View>

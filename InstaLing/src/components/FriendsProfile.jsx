@@ -4,7 +4,11 @@ import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
-import {getUserProfile, sendCallNotification} from '../utils/api';
+import {
+  getFriendsList,
+  getUserProfile,
+  sendCallNotification,
+} from '../utils/api';
 
 const FriendsProfile = () => {
   const [friends, setFriends] = useState([]);
@@ -20,46 +24,26 @@ const FriendsProfile = () => {
     myProfile();
   }, []);
 
-  const getFriendsList = async () => {
-    const token = await AsyncStorage.getItem('token');
-    try {
-      const response = await fetch(
-        `https://stranger-backend.onrender.com/auth/friendlist`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: token,
-          },
-        },
-      );
-      if (response.status === 200) {
-        const data = await response.json();
-        setFriends(data);
-      }
-    } catch (error) {
-      console.log(error);
+  const handleFriendlist = async () => {
+    const friendList = await getFriendsList();
+    if (friendList) {
+      setFriends(friendList);
     }
   };
 
   useEffect(() => {
-    getFriendsList();
+    handleFriendlist();
   }, []);
 
-  const handleFriendScreen = async (
-    userId,
-    username,
-    backgroundImage,
-    profileImage,
-    followers,
-    following,
-  ) => {
+  const handleFriendScreen = async friendDet => {
     navigation.navigate('FriendProfileDetailScreen', {
-      userId: userId,
-      username: username,
-      backgroundImage: backgroundImage,
-      profileImage: profileImage,
-      followers: followers,
-      following: following,
+      userId: friendDet._id,
+      username: friendDet.username,
+      backgroundImage: friendDet.backgroundImage,
+      profileImage: friendDet.profileImage,
+      followers: friendDet.followers,
+      following: friendDet.following,
+      friendDet,
     });
   };
 
@@ -92,16 +76,7 @@ const FriendsProfile = () => {
                     alignItems: 'center',
                     margin: 3,
                   }}
-                  onPress={() =>
-                    handleFriendScreen(
-                      friend._id,
-                      friend.username,
-                      friend.backgroundImage,
-                      friend.profileImage,
-                      friend.followers,
-                      friend.following,
-                    )
-                  }>
+                  onPress={() => handleFriendScreen(friend)}>
                   <Image
                     width={60}
                     height={60}

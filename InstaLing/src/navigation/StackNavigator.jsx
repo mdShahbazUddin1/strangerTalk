@@ -1,7 +1,7 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {StatusBar} from 'react-native';
+import {StatusBar, View} from 'react-native';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -34,6 +34,7 @@ import ForgotPasswordScreen from '../screens/ForgotPassword';
 import PasswordOtp from '../screens/PasswordOtp';
 import ChangePass from '../screens/ChangePass';
 import MainScreen from '../screens/MainScreen';
+import HelpAndSupport from '../screens/HelpAndSupport';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -59,16 +60,28 @@ const StackNavigator = () => {
           name="Call"
           component={FindCallScreen}
           options={{
-            tabBarIcon: ({color}) => (
-              <MaterialCommunityIcons
-                name="phone-plus"
-                size={29}
-                color={color}
-              />
+            tabBarLabel: '', // Hides the text
+            tabBarIcon: ({focused, color, size}) => (
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: -3,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  marginRight: 2,
+                }}>
+                <MaterialCommunityIcons
+                  name="phone-plus"
+                  size={37}
+                  color={'#6D31EDFF'}
+                  // style={{marginTop: -15}} // Adjust the icon position
+                />
+              </View>
             ),
           }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Friends"
           component={FriendsScreen}
           options={{
@@ -76,7 +89,7 @@ const StackNavigator = () => {
               <Feather name="users" size={23} color={color} />
             ),
           }}
-        />
+        /> */}
         <Tab.Screen
           name="Profile"
           component={AccountDetails}
@@ -119,8 +132,18 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="Friends"
+          component={FriendsScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="WelComeBack"
           component={WelcomeBack}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="HelpAndSupport"
+          component={HelpAndSupport}
           options={{headerShown: false}}
         />
         <Stack.Screen

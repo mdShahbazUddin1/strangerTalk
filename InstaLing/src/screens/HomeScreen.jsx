@@ -157,7 +157,7 @@ function HomeScreen() {
         )}
 
         {/* Games */}
-        <UserGames />
+        {/* <UserGames /> */}
       </ScrollView>
     </SafeAreaView>
   );

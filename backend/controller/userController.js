@@ -430,6 +430,48 @@ const followUser = async (req, res) => {
   }
 };
 
+const unfollowUser = async (req, res) => {
+  const { userIdToUnfollow } = req.params;
+  const currentUserId = req.userId;
+
+  try {
+    // Find the current user by ID
+    const currentUser = await UserModel.findById(currentUserId);
+
+    if (!currentUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check if the user to be unfollowed exists
+    const userToUnfollow = await UserModel.findById(userIdToUnfollow);
+
+    if (!userToUnfollow) {
+      return res.status(404).send({ message: "User to unfollow not found" });
+    }
+
+    // Check if the current user is actually following the user
+    if (!currentUser.following.includes(userIdToUnfollow)) {
+      return res.status(400).send({ message: "User not followed" });
+    }
+
+    // Remove the user ID of the user to be unfollowed from the following array of the current user
+    currentUser.following = currentUser.following.filter(
+      (id) => id.toString() !== userIdToUnfollow
+    );
+    await currentUser.save();
+
+    // Remove the current user's ID from the followers array of the user being unfollowed
+    userToUnfollow.followers = userToUnfollow.followers.filter(
+      (id) => id.toString() !== currentUserId
+    );
+    await userToUnfollow.save();
+
+    return res.status(200).send({ message: "User unfollowed successfully" });
+  } catch (error) {
+    return res.status(500).send({ message: "Error: " + error.message });
+  }
+};
+
 const checkFollowStatus = async (req, res) => {
   const { userId } = req.params;
   const currentUserId = req.userId; // Assuming you have middleware to extract user ID from token
@@ -600,6 +642,7 @@ module.exports = {
   updateProfile,
   getSingleUser,
   followUser,
+  unfollowUser,
   getMutualFriends,
   checkFollowStatus,
   disconnectUsers,

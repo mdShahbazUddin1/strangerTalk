@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import {Image, TouchableOpacity, View, Text} from 'react-native';
+import {Image, TouchableOpacity, View, Text, Pressable} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import UpgradePremium from './UpgradePremium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ActivityIndicator} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
+import {sendCallNotification, unfollowUser} from '../utils/api';
 
 function FriendList() {
   const [friend, setFriend] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   const getFriendList = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -36,6 +39,26 @@ function FriendList() {
   useEffect(() => {
     getFriendList();
   }, []);
+
+  const handleUnfollow = async userId => {
+    const unFollowUser = await unfollowUser(userId);
+    if (unFollowUser) {
+      getFriendList();
+    }
+  };
+
+  const handleFriendScreen = async friendDet => {
+    navigation.navigate('FriendProfileDetailScreen', {
+      userId: friendDet._id,
+      username: friendDet.username,
+      backgroundImage: friendDet.backgroundImage,
+      profileImage: friendDet.profileImage,
+      followers: friendDet.followers,
+      following: friendDet.following,
+      friendDet,
+    });
+  };
+
   return (
     <>
       {loading ? (
@@ -53,7 +76,7 @@ function FriendList() {
       ) : (
         friend.map(user => {
           return (
-            <>
+            <TouchableOpacity onPress={() => handleFriendScreen(user)}>
               <View
                 key={user._id}
                 style={{
@@ -160,7 +183,8 @@ function FriendList() {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                       }}>
-                      {/* <TouchableOpacity
+                      <TouchableOpacity
+                        onPress={() => handleUnfollow(user._id)}
                         style={{
                           width: 104,
                           backgroundColor: '#6D31EDFF',
@@ -176,9 +200,9 @@ function FriendList() {
                             textAlign: 'center',
                             color: '#ffffff',
                           }}>
-                          Call
+                          Unfollow
                         </Text>
-                      </TouchableOpacity> */}
+                      </TouchableOpacity>
                       <TouchableOpacity
                         style={{
                           width: 104,
@@ -203,7 +227,7 @@ function FriendList() {
                   </View>
                 </View>
               </View>
-            </>
+            </TouchableOpacity>
           );
         })
       )}

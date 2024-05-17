@@ -8,9 +8,22 @@ import {
   ScrollView,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {getRandomAllFeedBack} from '../utils/api';
+import {
+  getRandomAllFeedBack,
+  getUserProfile,
+  saveFollowNotification,
+  sendCallNotification,
+  unfollowUser,
+} from '../utils/api';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FriendProfileDetailScreen = ({route}) => {
+  const navigation = useNavigation();
+  const [user, setUser] = useState({});
+  const [feedback, setFeedBack] = useState([]);
+  const [isUnfollow, setIsUnfollow] = useState(false);
+
   const {
     userId,
     username,
@@ -18,8 +31,8 @@ const FriendProfileDetailScreen = ({route}) => {
     profileImage,
     followers,
     following,
+    friendDet,
   } = route.params;
-  const [feedback, setFeedBack] = useState([]);
 
   const getAllFeedBack = async () => {
     try {
@@ -31,9 +44,62 @@ const FriendProfileDetailScreen = ({route}) => {
     }
   };
 
+  const myProfile = async () => {
+    const userProfile = await getUserProfile();
+    setUser(userProfile);
+  };
+
+  useEffect(() => {
+    myProfile();
+  }, []);
+
   useEffect(() => {
     getAllFeedBack();
   }, []);
+
+  const handleUnfollow = async () => {
+    const unFollowUser = await unfollowUser(userId);
+    if (unFollowUser) {
+      setIsUnfollow(true);
+    }
+  };
+
+  const handleFollowUser = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const followerUsername = await AsyncStorage.getItem('username');
+
+    try {
+      const response = await fetch(
+        `https://stranger-backend.onrender.com/auth/follow/${userId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token,
+          },
+        },
+      );
+      if (response.status === 400) {
+        console.log('User already followed');
+      }
+      if (response.status === 200) {
+        await saveFollowNotification(userId);
+
+        setIsUnfollow(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleFriendCall = async () => {
+    try {
+      const sendNotification = await sendCallNotification(userId);
+      navigation.navigate('FriendCalling', {pairedData: [user, friendDet]});
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -138,6 +204,9 @@ const FriendProfileDetailScreen = ({route}) => {
               </View>
             </View>
           </View>
+          <View>
+            <Text style={{color: 'green'}}>Online</Text>
+          </View>
         </View>
         <View
           style={{
@@ -146,9 +215,10 @@ const FriendProfileDetailScreen = ({route}) => {
             justifyContent: 'space-between',
             marginTop: 30,
           }}>
-          {/* <TouchableOpacity
+          <TouchableOpacity
+            onPress={handleFriendCall}
             style={{
-              width: 150,
+              width: 100,
               backgroundColor: '#6D31EDFF',
               padding: 8,
               borderRadius: 4,
@@ -164,27 +234,76 @@ const FriendProfileDetailScreen = ({route}) => {
               }}>
               Call
             </Text>
-          </TouchableOpacity> */}
-          <TouchableOpacity
-            style={{
-              width: 150,
-              borderWidth: 1,
-              borderColor: '#6D31EDFF',
-              padding: 8,
-              borderRadius: 4,
-              marginTop: 30,
-            }}>
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                fontFamily: 'sans-serif',
-                textAlign: 'center',
-                color: '#6D31EDFF',
-              }}>
-              Friends
-            </Text>
           </TouchableOpacity>
+
+          {!isUnfollow ? (
+            <TouchableOpacity
+              style={{
+                width: 100,
+                borderWidth: 1,
+                borderColor: '#6D31EDFF',
+                padding: 8,
+                borderRadius: 4,
+                marginTop: 30,
+              }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  lineHeight: 18,
+                  fontFamily: 'sans-serif',
+                  textAlign: 'center',
+                  color: '#6D31EDFF',
+                }}>
+                Following
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleFollowUser}
+              style={{
+                width: 100,
+                borderWidth: 1,
+                borderColor: '#6D31EDFF',
+                padding: 8,
+                borderRadius: 4,
+                marginTop: 30,
+              }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  lineHeight: 18,
+                  fontFamily: 'sans-serif',
+                  textAlign: 'center',
+                  color: '#6D31EDFF',
+                }}>
+                Follow
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {isUnfollow ? null : (
+            <TouchableOpacity
+              onPress={handleUnfollow}
+              style={{
+                width: 100,
+                borderWidth: 1,
+                borderColor: '#6D31EDFF',
+                padding: 8,
+                borderRadius: 4,
+                marginTop: 30,
+              }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  lineHeight: 18,
+                  fontFamily: 'sans-serif',
+                  textAlign: 'center',
+                  color: '#6D31EDFF',
+                }}>
+                Unfollow
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <View style={{flex: 1, margin: 15}}>

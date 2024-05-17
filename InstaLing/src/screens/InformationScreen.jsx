@@ -5,22 +5,22 @@ const InformationScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Information</Text>
-      <View style={styles.infoItem}>
+      {/* <View style={styles.infoItem}>
         <Text style={styles.infoTitle}>Camera Permission:</Text>
         <Text style={styles.infoText}>
           We require camera permission to make video calls.
         </Text>
-      </View>
+      </View> */}
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Audio & Video Permission:</Text>
+        <Text style={styles.infoTitle}>Audio Permission:</Text>
         <Text style={styles.infoText}>
-          We need audio and video permission for audio and video calls.
+          We need audio permission for audio calls.
         </Text>
       </View>
       <View style={styles.infoItem}>
         <Text style={styles.infoTitle}>Gallery Access:</Text>
         <Text style={styles.infoText}>
-          Gallery access is required to share photos during calls.
+          Gallery access is required to share photos.
         </Text>
       </View>
       <View style={styles.infoItem}>

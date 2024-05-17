@@ -347,3 +347,52 @@ export const verifyOtp = async otp => {
     throw error; // Propagate the error for handling by the caller
   }
 };
+
+export const unfollowUser = async userIdToUnfollow => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(
+      `${BASE_URL}/auth/unfollow/${userIdToUnfollow}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      },
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('User unfollowed successfully:', data);
+      return data;
+    } else {
+      const errorData = await response.json();
+      console.error('Failed to unfollow user:', errorData.message);
+    }
+  } catch (error) {
+    console.error('Error unfollowing user:', error);
+  }
+};
+
+export const getFriendsList = async () => {
+  const token = await AsyncStorage.getItem('token');
+  try {
+    const response = await fetch(`${BASE_URL}/auth/friendlist`, {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+      },
+    });
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    } else {
+      const errorData = await response.json();
+      console.error('Failed to getfriend list:', errorData.msg);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};

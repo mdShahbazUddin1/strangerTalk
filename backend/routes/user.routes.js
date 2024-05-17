@@ -18,6 +18,7 @@ const {
   sendOtp,
   verifyOtp,
   getPairedUserDetails,
+  unfollowUser,
 } = require("../controller/userController");
 const { auth } = require("../middleware/auth");
 
@@ -51,7 +52,7 @@ userRoute.put(
 userRoute.get("/logout", auth, logout);
 userRoute.get("/disconnect", auth, disconnectUsers);
 userRoute.post("/follow/:userIdToFollow", auth, followUser);
-
+userRoute.post("/unfollow/:userIdToUnfollow", auth, unfollowUser);
 userRoute.get("/friendlist", auth, getMutualFriends);
 userRoute.get("/checkfollow/:userId", auth, checkFollowStatus);
 userRoute.get("/checkstatus/:randomId", auth, checkRandomUserConnection);
