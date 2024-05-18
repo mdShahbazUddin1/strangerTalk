@@ -50,6 +50,29 @@ const getUnseenNotifications = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+const getallNotifications = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const notifications = await NotificationModel.find({
+      type: "follow",
+      follow_target: userId,
+    }).sort({ createdAt: -1 });
+
+    // Populate the user field to get the name of the follower
+    const populatedNotifications = await NotificationModel.populate(
+      notifications,
+      { path: "user", select: "username" }
+    );
+
+    res
+      .status(200)
+      .json({ success: true, notifications: populatedNotifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
 const markNotificationUnseen = async (req, res) => {
   try {
@@ -70,6 +93,26 @@ const markNotificationUnseen = async (req, res) => {
       "Error marking all notifications as seen for the logged-in user:",
       error
     );
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+const deleteAllNotifications = async (req, res) => {
+  try {
+    const userId = req.userId; // Get the user ID from request (assuming it's set in middleware)
+
+    // Delete all notifications for the specific user
+    const result = await NotificationModel.deleteMany({
+      follow_target: userId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All notifications deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting notifications:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -175,4 +218,6 @@ module.exports = {
   sendCallNotification,
   getRecentCallNotifications,
   getLatestCallDetails,
+  getallNotifications,
+  deleteAllNotifications,
 };

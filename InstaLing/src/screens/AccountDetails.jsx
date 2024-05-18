@@ -4,17 +4,51 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountDetails = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch(
+        'https://stranger-backend.onrender.com/auth/logout',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: token,
+          },
+        },
+      );
+
+      if (response.ok) {
+        await AsyncStorage.removeItem('isLoggedIn');
+        await AsyncStorage.removeItem('token');
+        navigation.replace('Login');
+      } else {
+        // Handle non-successful response (e.g., display an error message)
+        console.error('Failed to logout:', response.statusText);
+      }
+    } catch (error) {
+      // Handle fetch errors (e.g., network error)
+      console.error('Error during logout:', error);
+      // Optionally, display an error message to the user
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
 
   return (
     <SafeAreaView
@@ -289,6 +323,23 @@ const AccountDetails = () => {
             </View>
           </View>
         </View>
+
+        <TouchableOpacity onPress={handleLogout} disabled={loading}>
+          {loading ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <ActivityIndicator size="small" color="red" />
+            </View>
+          ) : (
+            <Text style={{color: 'red', margin: 10, fontWeight: '700'}}>
+              Logout
+            </Text>
+          )}
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

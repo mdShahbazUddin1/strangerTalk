@@ -32,6 +32,7 @@ const FriendProfileDetailScreen = ({route}) => {
     followers,
     following,
     friendDet,
+    refreshFriendList,
   } = route.params;
 
   const getAllFeedBack = async () => {
@@ -61,6 +62,7 @@ const FriendProfileDetailScreen = ({route}) => {
     const unFollowUser = await unfollowUser(userId);
     if (unFollowUser) {
       setIsUnfollow(true);
+      refreshFriendList();
     }
   };
 
@@ -86,6 +88,7 @@ const FriendProfileDetailScreen = ({route}) => {
         await saveFollowNotification(userId);
 
         setIsUnfollow(false);
+        refreshFriendList();
       }
     } catch (error) {
       console.log(error);

@@ -205,6 +205,34 @@ export const fetchNotifications = async () => {
   }
 };
 
+export const fetchAllNotifications = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found');
+      return;
+    }
+
+    const response = await fetch(`${BASE_URL}/notification/getallnoti`, {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // console.log('Notifications fetched successfully:', data);
+      return data;
+    } else {
+      console.error('Failed to fetch notifications:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+  }
+};
+
 export const markNotificationSeen = async () => {
   try {
     const token = await AsyncStorage.getItem('token');
@@ -272,7 +300,7 @@ export const getCallNotification = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('You Got New Call', data.recentCallNotifications);
+      // console.log('You Got New Call', data.recentCallNotifications);
       return data.recentCallNotifications;
     } else {
       throw new Error('Failed to fetch notifications: call');

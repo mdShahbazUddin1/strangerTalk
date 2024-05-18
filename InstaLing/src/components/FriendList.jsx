@@ -36,6 +36,7 @@ function FriendList() {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getFriendList();
   }, []);

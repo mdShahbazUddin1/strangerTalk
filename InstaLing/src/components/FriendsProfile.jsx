@@ -44,6 +44,7 @@ const FriendsProfile = () => {
       followers: friendDet.followers,
       following: friendDet.following,
       friendDet,
+      refreshFriendList: handleFriendlist,
     });
   };
 
