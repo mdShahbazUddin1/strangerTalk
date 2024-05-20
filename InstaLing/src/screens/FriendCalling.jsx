@@ -58,26 +58,22 @@ const FriendCalling = ({route}) => {
     // Load the ringtone file
     let ringtoneSound = null;
     if (ringtone) {
-      ringtoneSound = new Sound(
-        'zego_incoming.mp3',
-        Sound.MAIN_BUNDLE,
-        error => {
-          if (error) {
-            console.error('Failed to load the ringtone:', error);
-            return;
-          }
-          // Start playing the ringtone if not connected
-          if (!callConnected) {
-            ringtoneSound.play(success => {
-              if (success) {
-                console.log('Ringtone started successfully');
-              } else {
-                console.error('Failed to start the ringtone');
-              }
-            });
-          }
-        },
-      );
+      ringtoneSound = new Sound('incoming.mp3', Sound.MAIN_BUNDLE, error => {
+        if (error) {
+          console.error('Failed to load the ringtone:', error);
+          return;
+        }
+        // Start playing the ringtone if not connected
+        if (!callConnected) {
+          ringtoneSound.play(success => {
+            if (success) {
+              console.log('Ringtone started successfully');
+            } else {
+              console.error('Failed to start the ringtone');
+            }
+          });
+        }
+      });
     }
 
     return () => {

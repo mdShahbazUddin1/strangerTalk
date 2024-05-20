@@ -9,6 +9,8 @@ const userRoute = require("./routes/user.routes");
 const historyRoute = require("./routes/callHistory.routes");
 const feedBackRoute = require("./routes/feedback.routes");
 const { notifyRoute } = require("./routes/notify.routes");
+const UserModel = require("./models/usermodel");
+const { auth } = require("./middleware/auth");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 8080;
@@ -36,8 +38,22 @@ app.use("/call", historyRoute);
 app.use("/feedback", feedBackRoute);
 app.use("/notification", notifyRoute);
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("User Connected" + socket.id);
+
+  const userId = socket.handshake.query.userId;
+
+  if (userId) {
+    try {
+      const user = await UserModel.findById(userId);
+      if (user) {
+        user.online = true;
+        await user.save();
+      }
+    } catch (error) {
+      console.error("Error updating user status:", error);
+    }
+  }
 
   socket.on("join", (roomName) => {
     let rooms = io.sockets.adapter.rooms;
@@ -90,8 +106,19 @@ io.on("connection", (socket) => {
   });
 
   // Handle disconnection
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log("User disconnected");
+    if (userId) {
+      try {
+        const user = await UserModel.findById(userId);
+        if (user) {
+          user.online = false; // Set user's online status to false
+          await user.save();
+        }
+      } catch (error) {
+        console.error("Error updating user status:", error);
+      }
+    }
   });
 });
 // Start the server

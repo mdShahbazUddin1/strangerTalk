@@ -32,6 +32,7 @@ const FriendProfileDetailScreen = ({route}) => {
     followers,
     following,
     friendDet,
+    online,
     refreshFriendList,
   } = route.params;
 
@@ -208,7 +209,11 @@ const FriendProfileDetailScreen = ({route}) => {
             </View>
           </View>
           <View>
-            <Text style={{color: 'green'}}>Online</Text>
+            {online ? (
+              <Text style={{color: 'green'}}>online</Text>
+            ) : (
+              <Text style={{color: 'gray'}}>offline</Text>
+            )}
           </View>
         </View>
         <View
@@ -340,14 +345,17 @@ const FriendProfileDetailScreen = ({route}) => {
                   marginTop: 0,
                   marginBottom: 5,
                 }}>
-                <Text
-                  style={{
-                    color: 'black',
-                    fontWeight: '700',
-                    fontFamily: 'sans-serif',
-                  }}>
-                  {feedbackItem.caller_user_id.username}
-                </Text>
+                {feedbackItem.feedbackContent.options.length > 0 ||
+                feedbackItem.feedbackContent.comment.length > 0 ? (
+                  <Text
+                    style={{
+                      color: 'black',
+                      fontWeight: '700',
+                      fontFamily: 'sans-serif',
+                    }}>
+                    {feedbackItem.caller_user_id.username}
+                  </Text>
+                ) : null}
                 {/* Render options */}
                 {feedbackItem.feedbackContent.options.map(option => (
                   <Text
@@ -364,17 +372,19 @@ const FriendProfileDetailScreen = ({route}) => {
                   </Text>
                 ))}
                 {/* Render comment */}
-                <Text
-                  style={{
-                    color: 'black',
-                    marginTop: 5,
-                    fontFamily: 'sans-serif',
-                    fontSize: 13,
-                    padding: 7,
-                    backgroundColor: '#F5F5F5',
-                  }}>
-                  {feedbackItem.feedbackContent.comment}
-                </Text>
+                {feedbackItem.feedbackContent.comment.length > 0 && (
+                  <Text
+                    style={{
+                      color: 'black',
+                      marginTop: 5,
+                      fontFamily: 'sans-serif',
+                      fontSize: 13,
+                      padding: 7,
+                      backgroundColor: '#F5F5F5',
+                    }}>
+                    {feedbackItem.feedbackContent.comment}
+                  </Text>
+                )}
               </View>
             ))
           )}

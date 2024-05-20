@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -56,6 +57,26 @@ function FeedBackForm() {
   const handleCancel = () => {
     navigation.replace('Main');
   };
+
+  const handleBlockPress = () => {
+    Alert.alert(
+      'Block User',
+      'Do you want to block this user?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Block',
+          onPress: () => navigation.replace('Main'),
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   const saveFeedBack = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
@@ -105,10 +126,10 @@ function FeedBackForm() {
                 Cancel
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              {/* <Text style={{color: 'red', fontSize: 14, fontWeight: '400'}}>
+            <TouchableOpacity onPress={handleBlockPress}>
+              <Text style={{color: 'red', fontSize: 14, fontWeight: '400'}}>
                 Block
-              </Text> */}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -175,7 +196,7 @@ function FeedBackForm() {
                 fontSize: 20,
                 fontFamily: 'sans-serif',
               }}>
-              What do you like the most?
+              Feedback About The User?
             </Text>
             <View style={styles.container}>
               {interests?.map((interest, index) => (
@@ -201,6 +222,15 @@ function FeedBackForm() {
 
           {/* Textarea for thoughts */}
           <View style={{marginTop: 15}}>
+            <Text
+              style={{
+                color: '#171A1FFF',
+                fontWeight: '500',
+                fontSize: 17,
+                fontFamily: 'sans-serif',
+              }}>
+              Type Feedback About The User?
+            </Text>
             {/* Remaining code */}
             <TextInput
               style={styles.textArea}

@@ -242,6 +242,7 @@ const AccountDetails = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => navigation.navigate('Language')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

@@ -35,6 +35,7 @@ import PasswordOtp from '../screens/PasswordOtp';
 import ChangePass from '../screens/ChangePass';
 import MainScreen from '../screens/MainScreen';
 import HelpAndSupport from '../screens/HelpAndSupport';
+import Language from '../screens/Language';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -144,6 +145,11 @@ const StackNavigator = () => {
         <Stack.Screen
           name="HelpAndSupport"
           component={HelpAndSupport}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Language"
+          component={Language}
           options={{headerShown: false}}
         />
         <Stack.Screen

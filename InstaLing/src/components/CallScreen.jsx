@@ -20,8 +20,27 @@ import {disconnectCall, saveCallHistory} from '../utils/api';
 import {updateCallDuration} from '../redux/actions';
 import {useDispatch, useSelector} from 'react-redux';
 import InCallManager from 'react-native-incall-manager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const socket = io('https://stranger-backend.onrender.com');
+
+AsyncStorage.getItem('userId')
+  .then(userId => {
+    if (userId) {
+      // Establish socket connection with userId from AsyncStorage
+      const socket = io('https://stranger-backend.onrender.com', {
+        query: {userId: userId},
+      });
+
+      // Now you can use the socket connection
+      console.log('Socket connection established with userId:', userId);
+    } else {
+      console.error('User ID not found in AsyncStorage');
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching userId from AsyncStorage:', error);
+  });
 
 const CallScreen = ({pairedData}) => {
   const [localStream, setLocalStream] = useState(null);

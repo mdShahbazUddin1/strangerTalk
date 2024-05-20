@@ -21,8 +21,8 @@ const WavyCallIndicator = () => {
   const [timerKey, setTimerKey] = useState(0); // Key for resetting CountdownCircleTimer
   const [remainingTime, setRemainingTime] = useState(60);
 
-  const handleEndCall = () => {
-    disconnectCall();
+  const handleEndCall = async () => {
+    await disconnectCall();
     navigation.replace('Main');
   };
 

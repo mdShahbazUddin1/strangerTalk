@@ -17,19 +17,15 @@ const CallAlert = () => {
     Sound.setCategory('Playback');
 
     // Load the ringtone when the component mounts
-    const newRingtone = new Sound(
-      'zego_incoming.mp3',
-      Sound.MAIN_BUNDLE,
-      error => {
-        if (error) {
-          console.log('failed to load the sound', error);
-          return;
-        }
-        // Loaded successfully
-        console.log('duration in seconds: ' + newRingtone.getDuration());
-        setRingtone(newRingtone); // Store the ringtone instance in state
-      },
-    );
+    const newRingtone = new Sound('outgoing.mp3', Sound.MAIN_BUNDLE, error => {
+      if (error) {
+        console.log('failed to load the sound', error);
+        return;
+      }
+      // Loaded successfully
+      console.log('duration in seconds: ' + newRingtone.getDuration());
+      setRingtone(newRingtone); // Store the ringtone instance in state
+    });
 
     return () => {
       // Stop and release the ringtone when component unmounts

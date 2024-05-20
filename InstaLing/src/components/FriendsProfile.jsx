@@ -43,6 +43,7 @@ const FriendsProfile = () => {
       profileImage: friendDet.profileImage,
       followers: friendDet.followers,
       following: friendDet.following,
+      online: friendDet.online,
       friendDet,
       refreshFriendList: handleFriendlist,
     });
