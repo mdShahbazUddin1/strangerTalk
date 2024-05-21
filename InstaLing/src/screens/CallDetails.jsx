@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,12 @@ import {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {getRandomAllFeedBack, saveFollowNotification} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const CallDetails = ({route}) => {
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
   const {
     callId,
     username,
@@ -24,6 +28,14 @@ const CallDetails = ({route}) => {
     followers,
   } = route.params;
   const [feedback, setFeedBack] = useState([]);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const [isFollowed, setIsFollowed] = useState(false);
   const formatCallTime = time => {
@@ -183,7 +195,7 @@ const CallDetails = ({route}) => {
                           fontWeight: '700',
                           color: '#323743FF',
                         }}>
-                        {followers.length} followers
+                        {followers.length} {strings.accountDetails.followers}
                       </Text>
                     </View>
                   </View>
@@ -201,7 +213,7 @@ const CallDetails = ({route}) => {
                           paddingHorizontal: 12,
                           marginTop: 5,
                         }}>
-                        online
+                        {strings.accountDetails.online}
                       </Text>
                     </View>
                   </View>
@@ -255,7 +267,9 @@ const CallDetails = ({route}) => {
                 textAlign: 'center',
                 color: '#6D31EDFF',
               }}>
-              {isFollowed ? 'Following' : 'Follow'}
+              {isFollowed
+                ? `${strings.accountDetails.following}`
+                : `${strings.accountDetails.follow}`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -273,7 +287,9 @@ const CallDetails = ({route}) => {
       <View style={{flex: 1, margin: 15}}>
         <View style={{margin: 0}}>
           <TouchableOpacity>
-            <Text style={styles.commentOption}>Received feedback</Text>
+            <Text style={styles.commentOption}>
+              {strings.accountDetails.received}
+            </Text>
           </TouchableOpacity>
         </View>
         {/* Display given or received comments based on the state */}

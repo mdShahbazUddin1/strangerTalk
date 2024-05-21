@@ -6,12 +6,23 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const MainScreen = () => {
   const navigation = useNavigation();
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   useEffect(() => {
     checkLoginStatus();
@@ -41,7 +52,7 @@ const MainScreen = () => {
             fontFamily: 'sans-serif',
             fontWeight: '700',
           }}>
-          Instalingual
+          {strings.appTitle}
         </Text>
 
         <Text
@@ -52,14 +63,14 @@ const MainScreen = () => {
             fontWeight: '700',
             marginTop: 100,
           }}>
-          New user
+          {strings.newUser}
         </Text>
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
             navigation.navigate('Register');
           }}>
-          <Text style={styles.buttonText}>Create Account</Text>
+          <Text style={styles.buttonText}>{strings.createAccount}</Text>
         </TouchableOpacity>
 
         <Text
@@ -70,14 +81,14 @@ const MainScreen = () => {
             fontWeight: '700',
             marginTop: 50,
           }}>
-          Already have an account
+          {strings.haveAccount}
         </Text>
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
             navigation.navigate('Login');
           }}>
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>{strings.login}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

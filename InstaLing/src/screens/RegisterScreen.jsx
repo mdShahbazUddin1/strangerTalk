@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Text,
   StyleSheet,
@@ -22,6 +22,8 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {sendOtp} from '../utils/api';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 // import auth from '@react-native-firebase/auth';
 // import {isValidPhoneNumber, parsePhoneNumber} from 'libphonenumber-js';
 
@@ -34,6 +36,15 @@ function RegisterScreen() {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const handleRegister = async values => {
     try {
@@ -151,8 +162,8 @@ function RegisterScreen() {
             }) => (
               <>
                 <View style={styles.textBox}>
-                  <Text style={styles.greet}>Nice to see you</Text>
-                  <Text style={styles.text}>Create your account</Text>
+                  <Text style={styles.greet}>{strings.greet}</Text>
+                  <Text style={styles.text}>{strings.createAccount}</Text>
                 </View>
                 <View style={styles.inputBox}>
                   <View
@@ -169,7 +180,7 @@ function RegisterScreen() {
                     />
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Enter your username"
+                      placeholder={strings.usernamePlaceholder}
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusUsername}
                       onBlur={handleBlur('username')}
@@ -203,7 +214,7 @@ function RegisterScreen() {
                     />
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Enter your email address"
+                      placeholder={strings.emailPlaceholder}
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusEmail}
                       onBlur={handleBlur('email')}
@@ -232,7 +243,7 @@ function RegisterScreen() {
                     <EvilIcons name="lock" size={30} color="gray" />
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Enter your password"
+                      placeholder={strings.passwordPlaceholder}
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusPassword}
                       onBlur={handleBlur('password')}
@@ -265,7 +276,7 @@ function RegisterScreen() {
                     />
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Enter your phone number"
+                      placeholder={strings.phonePlaceholder}
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusPhoneNumber}
                       onBlur={handleBlur('phone')}
@@ -298,10 +309,14 @@ function RegisterScreen() {
                       size={20}
                       color={values.termsChecked ? '#6D31EDFF' : '#9095A1FF'}
                     />
-                    <Text style={styles.checkboxText}>
-                      I agree to the terms and conditions
-                    </Text>
                   </TouchableOpacity>
+                  <Pressable
+                    style={styles.agreeTermsText}
+                    onPress={() => navigation.navigate('TermsAndCondtions')}>
+                    <Text style={styles.checkboxText}>
+                      {strings.agreeTerms}
+                    </Text>
+                  </Pressable>
                 </View>
                 {touched.termsChecked && errors.termsChecked && (
                   <Text style={styles.errorText}>{errors.termsChecked}</Text>
@@ -326,7 +341,7 @@ function RegisterScreen() {
                         fontWeight: '400',
                         textAlign: 'center',
                       }}>
-                      Register
+                      {strings.registerButton}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -348,7 +363,7 @@ function RegisterScreen() {
                       textAlign: 'center',
                       paddingBottom: 10,
                     }}>
-                    Already have an account ?
+                    {strings.haveAccount} ?
                   </Text>
                   <Pressable
                     style={{marginLeft: 5}}
@@ -363,7 +378,7 @@ function RegisterScreen() {
                         textAlign: 'center',
                         paddingBottom: 10,
                       }}>
-                      Login
+                      {strings.login}
                     </Text>
                   </Pressable>
                 </View>
@@ -481,7 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkboxText: {
-    color: 'black',
+    color: '#379AE6FF',
     marginLeft: 8,
   },
 });

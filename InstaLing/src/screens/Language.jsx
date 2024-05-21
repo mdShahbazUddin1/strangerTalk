@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import strings from '../locales/LocalizedString';
+import {getLng, setLng} from '../helper/ChangeLang';
+import {LanguageContext} from '../context/LanguageContext'; // Adjust the path as necessary
 
 const languages = [
   {label: 'English', code: 'EN'},
@@ -20,10 +22,28 @@ const languages = [
 ];
 
 const Language = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, []);
+
+  const fetchSelectedLanguage = async () => {
+    const lngData = await getLng();
+    if (lngData) {
+      strings.setLanguage(lngData);
+    }
+    setIsLoading(false);
+  };
 
   const handleLanguagePress = language => {
-    setSelectedLanguage(language);
+    changeLanguage(language.code.toLowerCase());
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
   };
 
   const handleCancelPress = () => {
@@ -31,17 +51,32 @@ const Language = () => {
     console.log('Cancel pressed');
   };
 
-  const handleSavePress = () => {
-    // Handle save changes logic here
-    console.log('Save pressed', selectedLanguage);
+  const handleSavePress = async () => {
+    if (selectedLanguage) {
+      await setLng(selectedLanguage.toLowerCase());
+      changeLanguage(selectedLanguage.toLowerCase());
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
+    }
   };
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Language Settings</Text>
+      <Text style={styles.title}>{strings.languageSettings.title}</Text>
       <Text style={styles.description}>
-        Select the language you prefer for communications.
+        {strings.languageSettings.description}
       </Text>
+      {showSuccessMessage && (
+        <Text style={styles.successMessage}>
+          Language changed successfully!
+        </Text>
+      )}
       <ScrollView contentContainerStyle={styles.scrollView}>
         {languages.map((language, index) => (
           <TouchableOpacity
@@ -49,7 +84,7 @@ const Language = () => {
             style={styles.languageContainer}
             onPress={() => handleLanguagePress(language)}>
             <View style={styles.radioButton}>
-              {selectedLanguage?.code === language.code && (
+              {selectedLanguage === language.code.toLowerCase() && (
                 <View style={styles.radioButtonSelected} />
               )}
             </View>
@@ -60,7 +95,7 @@ const Language = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.actionButton, styles.cancelButton]}
           onPress={handleCancelPress}>
@@ -71,7 +106,7 @@ const Language = () => {
           onPress={handleSavePress}>
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -154,6 +189,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  successMessage: {
+    marginTop: 5,
+    alignSelf: 'center',
+    color: 'green',
+    marginBottom: 5,
   },
 });
 

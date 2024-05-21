@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -14,6 +14,8 @@ import ProfileImageUploader from '../components/ProfileImageUploader';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getUserProfile} from '../utils/api';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 function MyProfileScreen() {
   const navigation = useNavigation();
@@ -22,6 +24,15 @@ function MyProfileScreen() {
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState('');
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const myProfile = async () => {
     try {
@@ -135,7 +146,7 @@ function MyProfileScreen() {
               fontWeight: '700',
               fontFamily: 'sans-serif',
             }}>
-            Profile
+            {strings.accountDetails.profile}
           </Text>
         </View>
         <TouchableOpacity style={{padding: 5}} onPress={handleLogout}>
@@ -176,7 +187,7 @@ function MyProfileScreen() {
                   fontFamily: 'sans-serif',
                   color: 'gray',
                 }}>
-                Username
+                {strings.accountDetails.username}
               </Text>
               <TextInput
                 style={{
@@ -200,7 +211,7 @@ function MyProfileScreen() {
                   fontFamily: 'sans-serif',
                   color: 'gray',
                 }}>
-                Phone
+                {strings.accountDetails.phone}
               </Text>
               <TextInput
                 style={{
@@ -223,7 +234,7 @@ function MyProfileScreen() {
                   fontFamily: 'sans-serif',
                   color: 'gray',
                 }}>
-                Email
+                {strings.accountDetails.email}
               </Text>
               <TextInput
                 style={{
@@ -247,7 +258,9 @@ function MyProfileScreen() {
                 padding: 10,
               }}
               onPress={handleUpdateProfile}>
-              <Text style={{color: '#ffffff'}}>Save Changes</Text>
+              <Text style={{color: '#ffffff'}}>
+                {strings.accountDetails.saveChanges}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

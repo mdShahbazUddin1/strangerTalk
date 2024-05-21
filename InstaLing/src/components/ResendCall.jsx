@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,20 @@ import {
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useNavigation} from '@react-navigation/native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 function ResendCall({resendUser}) {
   const navigation = useNavigation();
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -90,7 +101,7 @@ function ResendCall({resendUser}) {
               fontFamily: 'sans-serif',
               fontSize: 16,
             }}>
-            Recent Call
+            {strings.accountDetails.recentCall}
           </Text>
         </View>
         {/* <View>

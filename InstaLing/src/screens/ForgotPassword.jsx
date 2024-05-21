@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -12,11 +12,22 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {sendPassOtp} from '../utils/api';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const ForgotPasswordScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const handlePassOtp = async () => {
     try {
@@ -47,13 +58,10 @@ const ForgotPasswordScreen = () => {
       <View style={{position: 'relative', marginTop: 60, bottom: 30}}>
         <View style={styles.container}>
           <View style={styles.loginLblCon}>
-            <Text style={styles.loginLbl}>Forgot Password?</Text>
+            <Text style={styles.loginLbl}>{strings.forgot}</Text>
           </View>
           <View style={styles.forgotDes}>
-            <Text style={styles.forgotDesLbl}>
-              Don't worry! It happens, please enter the email associated with
-              your account
-            </Text>
+            <Text style={styles.forgotDesLbl}>{strings.forgotGreet}</Text>
           </View>
           <View style={styles.formCon}>
             <View style={styles.textBoxCon}>
@@ -74,7 +82,9 @@ const ForgotPasswordScreen = () => {
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.loginBtnLbl}>Submit</Text>
+                <Text style={styles.loginBtnLbl}>
+                  {strings.accountDetails.submit}
+                </Text>
               )}
             </Pressable>
           </View>

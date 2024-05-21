@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Text,
   StyleSheet,
@@ -23,6 +23,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const LoginScreen = () => {
   const [isFocusedEmail, setIsFocusedEmail] = useState(false);
@@ -33,6 +35,15 @@ const LoginScreen = () => {
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const handleLogin = async values => {
     try {
@@ -63,9 +74,7 @@ const LoginScreen = () => {
           'profileImage',
           responseData.user.profileImage,
         );
-        Alert.alert('Login successful', 'You have successfully logged in.', [
-          {text: 'OK', onPress: () => navigation.replace('WelComeBack')},
-        ]);
+        navigation.replace('WelComeBack');
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to login. Please try again later.');
@@ -166,7 +175,7 @@ const LoginScreen = () => {
               <>
                 <View style={styles.textBox}>
                   <Text style={styles.greet}>Hello Again !</Text>
-                  <Text style={styles.text}>Log into your account</Text>
+                  <Text style={styles.text}>{strings.loginGreet}</Text>
                 </View>
                 <View style={styles.inputBox}>
                   <View
@@ -183,7 +192,7 @@ const LoginScreen = () => {
                     />
                     <TextInput
                       style={styles.textInput}
-                      placeholder="Enter your email address"
+                      placeholder={strings.emailPlaceholder}
                       placeholderTextColor="#9095A1FF"
                       onFocus={handleFocusEmail}
                       onBlur={handleBlur('email')}
@@ -214,7 +223,7 @@ const LoginScreen = () => {
                       <EvilIcons name="lock" size={30} color="gray" />
                       <TextInput
                         style={styles.textInput}
-                        placeholder="Enter your password"
+                        placeholder={strings.passwordPlaceholder}
                         placeholderTextColor="#9095A1FF"
                         onFocus={handleFocusPassword}
                         onBlur={handleBlur('password')}
@@ -259,7 +268,7 @@ const LoginScreen = () => {
                           fontWeight: '400',
                           color: '#379AE6FF',
                         }}>
-                        Forgot password?
+                        {strings.forgot}
                       </Text>
                     </Pressable>
                   </View>
@@ -284,7 +293,7 @@ const LoginScreen = () => {
                         fontWeight: '400',
                         textAlign: 'center',
                       }}>
-                      Login
+                      {strings.login}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -305,7 +314,7 @@ const LoginScreen = () => {
                       textAlign: 'center',
                       paddingBottom: 10,
                     }}>
-                    Don't have an account ?
+                    {strings.noAccount}
                   </Text>
                   <Pressable
                     style={{marginLeft: 5}}
@@ -320,7 +329,7 @@ const LoginScreen = () => {
                         textAlign: 'center',
                         paddingBottom: 10,
                       }}>
-                      Create an account
+                      {strings.registerButton}
                     </Text>
                   </Pressable>
                 </View>

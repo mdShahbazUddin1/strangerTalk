@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import {
   Text,
   View,
@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import {sendOtp, verifyOtp} from '../utils/api';
 import {useNavigation} from '@react-navigation/native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const OTPScreen = ({route}) => {
   const {values} = route.params;
@@ -17,6 +19,15 @@ const OTPScreen = ({route}) => {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(120); // Timer in seconds
   const intervalRef = useRef(null);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   useEffect(() => {
     startTimer();
@@ -112,16 +123,18 @@ const OTPScreen = ({route}) => {
             fontFamily: 'sans-serif',
             fontWeight: '600',
           }}>
-          Instalingual
+          {strings.appTitle}
         </Text>
       </View>
       <View style={{marginTop: 50, alignItems: 'center'}}>
-        <Text style={{color: 'black', fontSize: 18}}>Verify your email</Text>
+        <Text style={{color: 'black', fontSize: 18}}>
+          {strings.verifyEmail}
+        </Text>
         <Text style={{color: 'black', marginTop: 2, fontSize: 14}}>
-          Enter 6 digit code recieved on your email
+          {strings.code}
         </Text>
       </View>
-      <Text style={styles.header}>Enter OTP</Text>
+      <Text style={styles.header}>{strings.otp}</Text>
       <View style={styles.otpContainer}>
         {[0, 1, 2, 3, 4, 5].map(index => (
           <TextInput
@@ -145,14 +158,14 @@ const OTPScreen = ({route}) => {
         style={styles.verifyButton}
         onPress={handleVerify}
         disabled={otp.length !== 6}>
-        <Text style={styles.verifyButtonText}>Verify</Text>
+        <Text style={styles.verifyButtonText}>{strings.verifyOtp}</Text>
       </TouchableOpacity>
 
       {timer === 0 && (
         <TouchableOpacity
           style={[styles.resendButton]}
           onPress={handleResendOTP}>
-          <Text style={styles.resendButtonText}>Resend OTP</Text>
+          <Text style={styles.resendButtonText}>{strings.resendOtp}</Text>
         </TouchableOpacity>
       )}
     </View>

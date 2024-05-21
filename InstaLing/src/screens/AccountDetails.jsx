@@ -11,13 +11,25 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import strings from '../locales/LocalizedString';
+import {getLng} from '../helper/ChangeLang';
+import {LanguageContext} from '../context/LanguageContext';
 
 const AccountDetails = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const handleLogout = async () => {
     setLoading(true);
@@ -65,7 +77,7 @@ const AccountDetails = () => {
               fontWeight: '700',
               color: 'gray',
             }}>
-            ACCOUNT
+            {strings.accountDetails.account}
           </Text>
           <View
             style={{
@@ -95,7 +107,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Personal Details
+                    {strings.accountDetails.personalDetails}
                   </Text>
                 </View>
 
@@ -122,7 +134,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Friend List
+                    {strings.accountDetails.friendList}
                   </Text>
                 </View>
                 <MaterialIcons
@@ -148,7 +160,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Information & Permissions
+                    {strings.accountDetails.informationPermissions}
                   </Text>
                 </View>
 
@@ -197,7 +209,7 @@ const AccountDetails = () => {
               fontWeight: '700',
               color: 'gray',
             }}>
-            SETTINGS
+            {strings.accountDetails.settings}
           </Text>
           <View
             style={{
@@ -231,7 +243,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Terms & condition
+                    {strings.accountDetails.termsConditions}
                   </Text>
                 </View>
 
@@ -258,7 +270,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Language
+                    {strings.accountDetails.language}
                   </Text>
                 </View>
 
@@ -311,7 +323,7 @@ const AccountDetails = () => {
                       fontFamily: 'sans-serif',
                       fontSize: 14,
                     }}>
-                    Help & support
+                    {strings.accountDetails.helpSupport}
                   </Text>
                 </View>
 
@@ -325,7 +337,15 @@ const AccountDetails = () => {
           </View>
         </View>
 
-        <TouchableOpacity onPress={handleLogout} disabled={loading}>
+        <TouchableOpacity
+          style={{
+            width: '80%',
+            backgroundColor: '#6D31EDFF',
+            marginLeft: 40,
+            borderRadius: 10,
+          }}
+          onPress={handleLogout}
+          disabled={loading}>
           {loading ? (
             <View
               style={{
@@ -336,8 +356,14 @@ const AccountDetails = () => {
               <ActivityIndicator size="small" color="red" />
             </View>
           ) : (
-            <Text style={{color: 'red', margin: 10, fontWeight: '700'}}>
-              Logout
+            <Text
+              style={{
+                color: 'white',
+                margin: 10,
+                fontWeight: '700',
+                textAlign: 'center',
+              }}>
+              {strings.accountDetails.logout}
             </Text>
           )}
         </TouchableOpacity>

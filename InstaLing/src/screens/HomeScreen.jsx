@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   ScrollView,
   Text,
@@ -21,6 +21,8 @@ import {
 import FriendsProfile from '../components/FriendsProfile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 function HomeScreen() {
   const [recentCall, setRecentCall] = useState([]);
@@ -28,6 +30,15 @@ function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const navigation = useNavigation();
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   useEffect(() => {
     // Display the activity indicator
@@ -97,7 +108,7 @@ function HomeScreen() {
                 color: '#171A1FFF',
                 lineHeight: 26,
               }}>
-              Instalingual
+              {strings.appTitle}
             </Text>
           </View>
           <Pressable

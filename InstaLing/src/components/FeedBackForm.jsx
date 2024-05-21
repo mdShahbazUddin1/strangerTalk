@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Alert,
   Image,
@@ -14,6 +14,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRoute} from '@react-navigation/native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 function FeedBackForm() {
   const route = useRoute();
@@ -42,7 +44,16 @@ function FeedBackForm() {
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [thoughts, setThoughts] = useState('');
   const navigation = useNavigation();
-  console.log(profileImage);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
+
   const handleStarClick = value => {
     setRating(value);
   };
@@ -123,7 +134,7 @@ function FeedBackForm() {
             <TouchableOpacity onPress={handleCancel}>
               <Text
                 style={{color: '#565D6DFF', fontSize: 14, fontWeight: '400'}}>
-                Cancel
+                {strings.accountDetails.cancel}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleBlockPress}>
@@ -161,7 +172,7 @@ function FeedBackForm() {
                   fontFamily: 'sans-serif',
                   textAlign: 'center',
                 }}>
-                Write a review...
+                {strings.accountDetails.review}
               </Text>
             </View>
             <View style={{alignItems: 'center', marginTop: 15}}>
@@ -196,7 +207,7 @@ function FeedBackForm() {
                 fontSize: 20,
                 fontFamily: 'sans-serif',
               }}>
-              Feedback About The User?
+              {strings.accountDetails.selectReview}
             </Text>
             <View style={styles.container}>
               {interests?.map((interest, index) => (
@@ -229,7 +240,7 @@ function FeedBackForm() {
                 fontSize: 17,
                 fontFamily: 'sans-serif',
               }}>
-              Type Feedback About The User?
+              {strings.accountDetails.typeReview}
             </Text>
             {/* Remaining code */}
             <TextInput
@@ -251,7 +262,9 @@ function FeedBackForm() {
                 backgroundColor: '#6D31EDFF',
                 borderRadius: 5,
               }}>
-              <Text style={{color: 'white'}}>Submit</Text>
+              <Text style={{color: 'white'}}>
+                {strings.accountDetails.submit}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

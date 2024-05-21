@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -17,13 +17,15 @@ import {
 } from '../utils/api';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const FriendProfileDetailScreen = ({route}) => {
   const navigation = useNavigation();
   const [user, setUser] = useState({});
   const [feedback, setFeedBack] = useState([]);
   const [isUnfollow, setIsUnfollow] = useState(false);
-
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
   const {
     userId,
     username,
@@ -35,6 +37,14 @@ const FriendProfileDetailScreen = ({route}) => {
     online,
     refreshFriendList,
   } = route.params;
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const getAllFeedBack = async () => {
     try {
@@ -182,7 +192,7 @@ const FriendProfileDetailScreen = ({route}) => {
                           fontWeight: '700',
                           color: '#323743FF',
                         }}>
-                        {followers.length} followers
+                        {followers.length} {strings.accountDetails.followers}
                       </Text>
                     </View>
                   </View>
@@ -200,7 +210,7 @@ const FriendProfileDetailScreen = ({route}) => {
                           fontWeight: '700',
                           color: '#323743FF',
                         }}>
-                        {following.length} followings
+                        {following.length} {strings.accountDetails.following}
                       </Text>
                     </View>
                   </View>
@@ -210,9 +220,13 @@ const FriendProfileDetailScreen = ({route}) => {
           </View>
           <View>
             {online ? (
-              <Text style={{color: 'green'}}>online</Text>
+              <Text style={{color: 'green'}}>
+                {strings.accountDetails.online}
+              </Text>
             ) : (
-              <Text style={{color: 'gray'}}>offline</Text>
+              <Text style={{color: 'gray'}}>
+                {strings.accountDetails.offline}
+              </Text>
             )}
           </View>
         </View>
@@ -240,7 +254,7 @@ const FriendProfileDetailScreen = ({route}) => {
                 textAlign: 'center',
                 color: '#ffffff',
               }}>
-              Call
+              {strings.accountDetails.call}
             </Text>
           </TouchableOpacity>
 
@@ -262,7 +276,7 @@ const FriendProfileDetailScreen = ({route}) => {
                   textAlign: 'center',
                   color: '#6D31EDFF',
                 }}>
-                Following
+                {strings.accountDetails.following}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -284,7 +298,7 @@ const FriendProfileDetailScreen = ({route}) => {
                   textAlign: 'center',
                   color: '#6D31EDFF',
                 }}>
-                Follow
+                {strings.accountDetails.follow}
               </Text>
             </TouchableOpacity>
           )}
@@ -308,7 +322,7 @@ const FriendProfileDetailScreen = ({route}) => {
                   textAlign: 'center',
                   color: '#6D31EDFF',
                 }}>
-                Unfollow
+                {strings.accountDetails.unfollow}
               </Text>
             </TouchableOpacity>
           )}
@@ -317,7 +331,9 @@ const FriendProfileDetailScreen = ({route}) => {
       <View style={{flex: 1, margin: 15}}>
         <View style={{margin: 0}}>
           <TouchableOpacity>
-            <Text style={styles.commentOption}>Received</Text>
+            <Text style={styles.commentOption}>
+              {strings.accountDetails.received}
+            </Text>
           </TouchableOpacity>
         </View>
 

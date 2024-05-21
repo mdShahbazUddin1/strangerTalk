@@ -9,6 +9,7 @@ const WelcomeBack = () => {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState('');
+
   useEffect(() => {
     const fetchData = async () => {
       let name = await AsyncStorage.getItem('username');

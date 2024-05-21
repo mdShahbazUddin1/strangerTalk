@@ -3,6 +3,7 @@ import {Provider} from 'react-redux';
 import {createStore} from 'redux';
 import reducer from './src/redux/reducers'; // Assuming you have a root reducer defined
 import StackNavigator from './src/navigation/StackNavigator';
+import {LanguageProvider} from './src/context/LanguageContext';
 // import {firebase} from '@react-native-firebase/app';
 
 // Create your Redux store
@@ -26,7 +27,9 @@ const store = createStore(reducer);
 const App = () => {
   return (
     <Provider store={store}>
-      <StackNavigator />
+      <LanguageProvider>
+        <StackNavigator />
+      </LanguageProvider>
     </Provider>
   );
 };

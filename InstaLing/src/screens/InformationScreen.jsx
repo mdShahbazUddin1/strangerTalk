@@ -1,107 +1,126 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const InformationScreen = () => {
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Information</Text>
-      {/* <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Camera Permission:</Text>
-        <Text style={styles.infoText}>
-          We require camera permission to make video calls.
-        </Text>
-      </View> */}
+      <Text style={styles.title}>{strings.informationScreen.title}</Text>
+
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Audio Permission:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.audioPermission}
+        </Text>
         <Text style={styles.infoText}>
-          We need audio permission for audio calls.
+          {strings.informationScreen.audioPermissionText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Gallery Access:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.galleryAccess}
+        </Text>
         <Text style={styles.infoText}>
-          Gallery access is required to share photos.
+          {strings.informationScreen.galleryAccessText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Privacy:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.privacy}
+        </Text>
         <Text style={styles.infoText}>
-          We highly prioritize your privacy. We do not share your data with
-          anyone. All communication is encrypted for added security.
+          {strings.informationScreen.privacyText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Data Security:</Text>
+        <Text style={styles.infoTitle}>
+          {' '}
+          {strings.informationScreen.dataSecurity}
+        </Text>
         <Text style={styles.infoText}>
-          Your data is securely stored on our servers. We use industry-standard
-          security measures to protect your information from unauthorized access
-          or misuse.
+          {strings.informationScreen.dataSecurityText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Customer Support:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.customerSupport}
+        </Text>
         <Text style={styles.infoText}>
-          We provide 24/7 customer support to assist you with any queries or
-          issues you may have. You can reach out to us via email, phone, or live
-          chat.
+          {strings.informationScreen.customerSupportText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>User Feedback:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.userFeedback}
+        </Text>
         <Text style={styles.infoText}>
-          We value your feedback! Feel free to share your thoughts and
-          suggestions with us. Your feedback helps us improve our services.
+          {strings.informationScreen.userFeedbackText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Terms & Conditions:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.termsConditions}
+        </Text>
         <Text style={styles.infoText}>
-          Please review our Terms & Conditions for using our app. By using our
-          app, you agree to abide by these terms.
+          {strings.informationScreen.termsConditionsText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Subscription:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.subscription}
+        </Text>
         <Text style={styles.infoText}>
-          Some features may require a subscription. You can view and manage your
-          subscription in the app settings.
+          {strings.informationScreen.subscriptionText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>App Updates:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.appUpdates}
+        </Text>
         <Text style={styles.infoText}>
-          We regularly update our app to improve performance and add new
-          features. Make sure to keep your app updated to access the latest
-          enhancements.
+          {strings.informationScreen.appUpdatesText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Community Guidelines:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.communityGuidelines}
+        </Text>
         <Text style={styles.infoText}>
-          We have community guidelines in place to ensure a positive and
-          respectful experience for all users. Please familiarize yourself with
-          these guidelines.
+          {strings.informationScreen.communityGuidelinesText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Accessibility:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.accessibility}
+        </Text>
         <Text style={styles.infoText}>
-          We strive to make our app accessible to everyone. If you encounter any
-          accessibility issues, please let us know so we can address them.
+          {strings.informationScreen.accessibilityText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>Legal Information:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.legalInformation}
+        </Text>
         <Text style={styles.infoText}>
-          For legal inquiries or concerns, please contact our legal team. We
-          take legal matters seriously and will address them promptly.
+          {strings.informationScreen.legalInformationText}
         </Text>
       </View>
       <View style={styles.infoItem}>
-        <Text style={styles.infoTitle}>About Us:</Text>
+        <Text style={styles.infoTitle}>
+          {strings.informationScreen.aboutUs}
+        </Text>
         <Text style={styles.infoText}>
-          Learn more about our company and mission. We are dedicated to
-          providing innovative solutions to enhance your experience.
+          {strings.informationScreen.aboutUsText}
         </Text>
       </View>
     </ScrollView>
