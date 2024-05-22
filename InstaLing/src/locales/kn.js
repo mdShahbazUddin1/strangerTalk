@@ -21,6 +21,9 @@ export default {
   resendOtp: 'OTP ಮರು ಕಳುಹಿಸಿ',
   forgotGreet:
     'ಚಿಂತೆ ಮಾಡಬೇಡಿ! ಇದು ಸಂಭವಿಸಬಹುದು, ದಯವಿಟ್ಟು ನಿಮ್ಮ ಖಾತೆಗೆ ಸಂಬಂಧಿಸಿದ ಇಮೇಲ್ ನಮೂದಿಸಿ',
+  newNotification: 'ಹೊಸ ಅಧಿಸೂಚನೆ',
+  startedFollow: 'ನಿಮಗೆ ಹಿಂಬಾಲಿಸಲಾಗುತ್ತಿದೆ',
+  noNotification: 'ಹೊಸ ಯಾವುದೇ ನೋಟಿಫಿಕೇಷನ್‌ಗಳು ಇಲ್ಲ',
   languageSettings: {
     title: 'ಭಾಷಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
     description: 'ಸಂವಹನಗಳಿಗೆ ನೀವು ಇಚ್ಛಿಸುವ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.',

@@ -306,17 +306,17 @@ function RegisterScreen() {
                     }}>
                     <FontAwesome
                       name={values.termsChecked ? 'check-square-o' : 'square-o'}
-                      size={20}
+                      size={25}
                       color={values.termsChecked ? '#6D31EDFF' : '#9095A1FF'}
                     />
                   </TouchableOpacity>
-                  <Pressable
-                    style={styles.agreeTermsText}
+                  <TouchableOpacity
+                    style={{marginLeft: 10}}
                     onPress={() => navigation.navigate('TermsAndCondtions')}>
                     <Text style={styles.checkboxText}>
                       {strings.agreeTerms}
                     </Text>
-                  </Pressable>
+                  </TouchableOpacity>
                 </View>
                 {touched.termsChecked && errors.termsChecked && (
                   <Text style={styles.errorText}>{errors.termsChecked}</Text>
@@ -498,6 +498,7 @@ const styles = StyleSheet.create({
   checkboxText: {
     color: '#379AE6FF',
     marginLeft: 8,
+    textDecorationLine: 'underline',
   },
 });
 

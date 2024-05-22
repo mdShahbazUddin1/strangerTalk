@@ -9,6 +9,7 @@ import {
 import strings from '../locales/LocalizedString';
 import {getLng, setLng} from '../helper/ChangeLang';
 import {LanguageContext} from '../context/LanguageContext'; // Adjust the path as necessary
+import {useNavigation} from '@react-navigation/native';
 
 const languages = [
   {label: 'English', code: 'EN'},
@@ -25,6 +26,7 @@ const Language = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchSelectedLanguage();
@@ -40,15 +42,14 @@ const Language = () => {
 
   const handleLanguagePress = language => {
     changeLanguage(language.code.toLowerCase());
-    setShowSuccessMessage(true);
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 3000);
+    // setShowSuccessMessage(true);
+    // setTimeout(() => {
+    //   setShowSuccessMessage(false);
+    // }, 3000);
   };
 
   const handleCancelPress = () => {
-    // Handle cancel logic here
-    console.log('Cancel pressed');
+    navigation.goBack();
   };
 
   const handleSavePress = async () => {
@@ -95,7 +96,7 @@ const Language = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      {/* <View style={styles.buttonContainer}>
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.actionButton, styles.cancelButton]}
           onPress={handleCancelPress}>
@@ -106,7 +107,7 @@ const Language = () => {
           onPress={handleSavePress}>
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
     </View>
   );
 };

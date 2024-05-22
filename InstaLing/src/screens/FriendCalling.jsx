@@ -65,6 +65,7 @@ const FriendCalling = ({route}) => {
         }
         // Start playing the ringtone if not connected
         if (!callConnected) {
+          ringtoneSound.setNumberOfLoops(-1); // Loop indefinitely
           ringtoneSound.play(success => {
             if (success) {
               console.log('Ringtone started successfully');
@@ -82,7 +83,7 @@ const FriendCalling = ({route}) => {
         ringtoneSound.release();
       }
     };
-  }, [ringtone]);
+  }, [ringtone, callConnected]);
 
   useEffect(() => {
     // Turn on the speakerphone when the component mounts

@@ -21,6 +21,9 @@ export default {
   resendOtp: 'OTP पुन्हा पाठवा',
   forgotGreet:
     'काळजी करू नका! हे होऊ शकते, कृपया आपल्या खात्याशी संबंधित ईमेल प्रविष्ट करा',
+  newNotification: 'नवीन सूचना',
+  startedFollow: 'तुमचा पाठलाग सुरू केला',
+  noNotification: 'कोणत्याही नवीन सूचना नाहीत',
   languageSettings: {
     title: 'भाषा सेटिंग्ज',
     description: 'संप्रेषणासाठी आपल्या आवडत्या भाषेची निवड करा.',

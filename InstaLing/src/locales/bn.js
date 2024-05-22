@@ -21,6 +21,9 @@ export default {
   resendOtp: 'পুনরায় প্রেরণ করুন OTP',
   forgotGreet:
     'চিন্তা করবেন না! এটা হয়, দয়া করে আপনার অ্যাকাউন্টের সাথে সংযুক্ত ইমেল প্রদান করুন',
+  newNotification: 'নতুন বিজ্ঞপ্তি',
+  startedFollow: 'আপনাকে অনুসরণ করতে শুরু করেছে',
+  noNotification: 'কোন নতুন বিজ্ঞপ্তি নেই',
   languageSettings: {
     title: 'ভাষা সেটিংস',
     description: 'আপনি যে ভাষা পছন্দ করেন তা নির্ধারণ করুন।',

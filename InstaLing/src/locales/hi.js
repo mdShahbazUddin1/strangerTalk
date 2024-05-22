@@ -21,6 +21,9 @@ export default {
   resendOtp: 'ओटीपी पुनः भेजें',
   forgotGreet:
     'चिंता मत करो! ऐसा होता है, कृपया इससे संबद्ध ईमेल दर्ज करें आपका खाता',
+  newNotification: 'नई अधिसूचना',
+  startedFollow: 'आपको फॉलो करना शुरू किया',
+  noNotification: 'कोई नई सूचनाएं नहीं',
   languageSettings: {
     title: 'भाषा सेटिंग्स',
     description: 'संचार के लिए अपनी पसंद की भाषा चुनें।',

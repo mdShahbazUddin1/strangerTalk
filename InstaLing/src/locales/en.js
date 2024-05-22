@@ -21,6 +21,9 @@ export default {
   resendOtp: 'Resend OTP',
   forgotGreet:
     "Don't worry! It happens, please enter the email associated with your account",
+  newNotification: 'New Notification',
+  startedFollow: 'Started following you',
+  noNotification: 'No new notifications',
   languageSettings: {
     title: 'Language Settings',
     description: 'Select the language you prefer for communications.',

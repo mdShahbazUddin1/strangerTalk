@@ -1,13 +1,24 @@
 import {View, Text, TouchableOpacity} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {fetchAllNotifications, markNotificationSeen} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {LanguageContext} from '../context/LanguageContext';
+import strings from '../locales/LocalizedString';
 
 const Notification = ({route}) => {
   const {getNotification} = route.params;
   const [isMounted, setIsMounted] = useState(false);
   const [allNotification, setAllNotification] = useState([]);
+  const {selectedLanguage, changeLanguage} = useContext(LanguageContext);
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, [selectedLanguage]);
+
+  const fetchSelectedLanguage = async () => {
+    strings.setLanguage(selectedLanguage);
+  };
 
   const handleMarkNotification = async () => {
     try {
@@ -81,7 +92,7 @@ const Notification = ({route}) => {
               marginTop: 10,
               fontWeight: '700',
             }}>
-            New Notification
+            {strings.newNotification}
           </Text>
           <View style={{width: '95%', alignItems: 'flex-end', marginTop: 10}}>
             <TouchableOpacity
@@ -109,7 +120,7 @@ const Notification = ({route}) => {
                   color: 'black',
                   // textAlign: 'start',
                 }}>
-                {noti.user.username} started following you
+                {noti.user.username} {strings.startedFollow}
               </Text>
             </View>
           ))}
@@ -122,7 +133,7 @@ const Notification = ({route}) => {
             marginTop: 10,
             fontWeight: '700',
           }}>
-          No new notifications
+          {strings.noNotification}
         </Text>
       )}
     </SafeAreaView>

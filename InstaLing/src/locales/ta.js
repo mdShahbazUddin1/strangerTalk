@@ -1,5 +1,5 @@
 export default {
-  appTitle: 'instalingual',
+  appTitle: 'உள்மொழி',
   newUser: 'புதிய பயனர்',
   createAccount: 'கணக்கை உருவாக்கு',
   haveAccount: 'ஏற்கனவே கணக்கு உள்ளது',
@@ -21,6 +21,9 @@ export default {
   resendOtp: 'OTP ஐ மீண்டும் அனுப்பவும்',
   forgotGreet:
     'கவலைப்பட வேண்டாம்! அது நடக்கலாம், உங்கள் கணக்குடன் தொடர்புடைய மின்னஞ்சலை உள்ளிடவும்',
+  newNotification: 'புதிய அறிவிப்பு',
+  startedFollow: 'உங்களை பின்தொடரத் தொடங்கியது',
+  noNotification: 'புதிய அறிவிப்புகள் இல்லை',
   languageSettings: {
     title: 'மொழி அமைப்புகள்',
     description:
@@ -41,11 +44,11 @@ export default {
     phone: 'தொலைபேசி',
     email: 'மின்னஞ்சல்',
     saveChanges: 'மாற்றங்களை சேமிக்கவும்',
-    followers: 'பின்தொடர்பவர்கள்',
+    followers: 'பின்பற்றுபவர்',
     following: 'பின்தொடர்பவர்கள்',
     call: 'அழைப்பு',
     follow: 'பின்தொடரவும்',
-    unfollow: 'பின்தொடராமல் செய்க',
+    unfollow: 'பின்தொடர வேண்டாம்',
     received: 'பெற்றது',
     online: 'ஆன்லைன்',
     offline: 'ஆஃப்லைன்',
